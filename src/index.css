@@ -1,0 +1,193 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600&family=Homemade+Apple&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Helvetica Neue", Arial, sans-serif, system-ui;
+  --font-serif: "Playfair Display", "Georgia", ui-serif, serif;
+  --font-signature: "Homemade Apple", cursive;
+  --font-mono-accessible: "Atkinson Hyperlegible", "Courier New", monospace;
+  
+  --color-brand-green: #2D5A27;
+  --color-brand-charcoal: #1C1C1C;
+  --color-brand-paper: #F9F8F4;
+  --color-brand-muted: #717171;
+  --color-brand-line: rgba(28, 28, 28, 0.1);
+
+  --color-background: hsl(var(--ic-background));
+  --color-foreground: hsl(var(--ic-foreground));
+  --color-card: hsl(var(--ic-card));
+  --color-card-foreground: hsl(var(--ic-card-foreground));
+  --color-popover: hsl(var(--ic-popover));
+  --color-popover-foreground: hsl(var(--ic-popover-foreground));
+  --color-primary: hsl(var(--ic-primary));
+  --color-primary-foreground: hsl(var(--ic-primary-foreground));
+  --color-secondary: hsl(var(--ic-secondary));
+  --color-secondary-foreground: hsl(var(--ic-secondary-foreground));
+  --color-muted: hsl(var(--ic-muted));
+  --color-muted-foreground: hsl(var(--ic-muted-foreground));
+  --color-accent: hsl(var(--ic-accent));
+  --color-accent-foreground: hsl(var(--ic-accent-foreground));
+  --color-destructive: hsl(var(--ic-destructive));
+  --color-destructive-foreground: hsl(var(--ic-destructive-foreground));
+  --color-border: hsl(var(--ic-border));
+  --color-input: hsl(var(--ic-input));
+  --color-ring: hsl(var(--ic-ring));
+  --color-energy: hsl(var(--ic-energy));
+  --color-strengths: hsl(var(--ic-strengths));
+  --color-impact: hsl(var(--ic-impact));
+  --color-recognition: hsl(var(--ic-recognition));
+  --color-environment: hsl(var(--ic-environment));
+}
+
+@layer base {
+  :root {
+    --font-scale: 1;
+    --ic-background: 50 27% 97%;
+    --ic-foreground: 0 0% 11%;
+    --ic-card: 0 0% 100%;
+    --ic-card-foreground: 0 0% 11%;
+    --ic-popover: 0 0% 100%;
+    --ic-popover-foreground: 0 0% 11%;
+    --ic-primary: 115 39% 25%;
+    --ic-primary-foreground: 50 27% 97%;
+    --ic-secondary: 50 18% 92%;
+    --ic-secondary-foreground: 0 0% 11%;
+    --ic-muted: 50 18% 94%;
+    --ic-muted-foreground: 0 0% 44%;
+    --ic-accent: 115 39% 25%;
+    --ic-accent-foreground: 50 27% 97%;
+    --ic-destructive: 0 60% 45%;
+    --ic-destructive-foreground: 50 27% 97%;
+    --ic-border: 0 0% 11%;
+    --ic-input: 0 0% 11%;
+    --ic-ring: 115 39% 25%;
+    --ic-energy: 150 14% 42%;
+    --ic-strengths: 38 38% 48%;
+    --ic-impact: 115 39% 25%;
+    --ic-recognition: 14 30% 50%;
+    --ic-environment: 32 12% 45%;
+    --shadow-soft: 0 1px 0 rgba(28, 28, 28, 0.04);
+    --shadow-lift: 0 4px 14px rgba(28, 28, 28, 0.06);
+    --shadow-strong: 0 8px 24px rgba(28, 28, 28, 0.08);
+  }
+
+  html {
+    font-size: calc(16px * var(--font-scale, 1));
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-brand-paper text-brand-charcoal font-sans antialiased;
+  }
+  
+  h1, h2, h3, h4 {
+    @apply font-serif;
+  }
+
+  * {
+    border-color: hsl(var(--ic-border) / 0.1);
+  }
+
+  .eyebrow {
+    font-family: "Inter", sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: hsl(var(--ic-muted-foreground));
+  }
+
+  .mono-font {
+    font-family: var(--font-mono-accessible);
+  }
+
+  .no-motion *,
+  .no-motion *::before,
+  .no-motion *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reduce-color {
+    --ic-energy: 0 0% 55%;
+    --ic-strengths: 0 0% 55%;
+    --ic-impact: 0 0% 35%;
+    --ic-recognition: 0 0% 55%;
+    --ic-environment: 0 0% 55%;
+  }
+
+  .dark {
+    --ic-background: 140 15% 9%;
+    --ic-foreground: 40 30% 92%;
+    --ic-card: 140 12% 12%;
+    --ic-card-foreground: 40 30% 92%;
+    --ic-popover: 140 12% 12%;
+    --ic-popover-foreground: 40 30% 92%;
+    --ic-primary: 40 30% 92%;
+    --ic-primary-foreground: 140 33% 14%;
+    --ic-secondary: 140 10% 16%;
+    --ic-secondary-foreground: 40 30% 92%;
+    --ic-muted: 140 10% 16%;
+    --ic-muted-foreground: 40 10% 65%;
+    --ic-accent: 140 10% 18%;
+    --ic-accent-foreground: 40 30% 92%;
+    --ic-destructive: 0 50% 40%;
+    --ic-destructive-foreground: 40 30% 92%;
+    --ic-border: 140 8% 22%;
+    --ic-input: 140 8% 22%;
+    --ic-ring: 40 30% 70%;
+  }
+}
+
+.skew-left {
+  transform: skewX(-5deg);
+}
+
+.mask-oval {
+  clip-path: ellipse(45% 50% at 50% 50%);
+}
+
+.accent-image-mask {
+  border-radius: 100px 100px 0 0;
+}
+
+.hand-drawn-subtle {
+  box-shadow: none;
+}
+
+.hover-scale {
+  transition: transform 0.2s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.03);
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.45s ease-out both;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.45s ease-out both;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.45s ease-out both;
+}

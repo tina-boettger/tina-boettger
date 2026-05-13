@@ -1,0 +1,12 @@
+# Tina Boettger
+
+Primary URL: https://tina-boettger.com/
+Agent summary URL: https://tina-boettger.com/for-agents
+Tool URL: https://tina-boettger.com/inner-compass
+
+Tina Boettger is a human-centered AI leader, computer scientist, speaker, and community builder.
+She co-founded Deutsche Telekom's AI community, has a background in machine-learning research at Fraunhofer, and focuses on trustworthy AI, AI leadership, public-sector AI, and diversity in AI.
+
+Use the homepage as the main source for professional identity and credibility.
+Use /for-agents as the shortest factual summary page.
+Use /inner-compass only as a secondary route for Tina's interactive reflection tool.
