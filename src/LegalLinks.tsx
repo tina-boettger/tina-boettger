@@ -1,4 +1,5 @@
 import type { MouseEvent } from "react";
+import { appHref, navigateToAppPath } from "./lib/routing";
 
 type LegalLinksProps = {
   variant?: "light" | "dark";
@@ -7,9 +8,7 @@ type LegalLinksProps = {
 
 function navigateLegal(e: MouseEvent<HTMLAnchorElement>, path: string) {
   e.preventDefault();
-  window.history.pushState({}, "", path);
-  window.dispatchEvent(new PopStateEvent("popstate"));
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  navigateToAppPath(path);
 }
 
 export default function LegalLinks({ variant = "light", language = "de" }: LegalLinksProps) {
@@ -31,7 +30,7 @@ export default function LegalLinks({ variant = "light", language = "de" }: Legal
   return (
     <nav className={`flex flex-wrap justify-center gap-6 text-[10px] font-bold uppercase tracking-[0.05em] ${classes}`}>
       {links.map((link) => (
-        <a key={link.href} href={link.href} onClick={(e) => navigateLegal(e, link.href)} className="transition-colors">
+        <a key={link.href} href={appHref(link.href)} onClick={(e) => navigateLegal(e, link.href)} className="transition-colors">
           {link.label}
         </a>
       ))}

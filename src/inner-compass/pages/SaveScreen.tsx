@@ -1,36 +1,14 @@
 import { Copy, Download, Trash2 } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { toast } from "../hooks/useToast";
+import { appHref, navigateToAppPath } from "../../lib/routing";
+import { savePrintableSummary } from "../lib/printSummary";
 import { translations } from "../lib/translations";
 import type { ReflectionData } from "../types/reflection";
 import { Button } from "../components/ui/Button";
 import { CelebrationConfetti } from "../components/CelebrationConfetti";
 import { FoxCompanion } from "../components/FoxCompanion";
 import { ScreenContainer } from "../components/ScreenContainer";
-
-function openPrintableSummary(title: string, body: string) {
-  const printable = window.open("", "_blank", "noopener,noreferrer,width=900,height=1100");
-  if (!printable) return;
-  printable.document.write(`
-    <html>
-      <head>
-        <title>${title}</title>
-        <style>
-          body { font-family: Inter, Arial, sans-serif; padding: 32px; color: #1c1c1c; }
-          h1 { font-family: "Playfair Display", Georgia, serif; }
-          pre { white-space: pre-wrap; font-family: Inter, Arial, sans-serif; line-height: 1.7; }
-        </style>
-      </head>
-      <body>
-        <h1>${title}</h1>
-        <pre>${body}</pre>
-      </body>
-    </html>
-  `);
-  printable.document.close();
-  printable.focus();
-  printable.print();
-}
 
 export function SaveScreen({ data, onRestart }: { data: ReflectionData; onRestart: () => void }) {
   const { language } = useLanguage();
@@ -47,7 +25,11 @@ export function SaveScreen({ data, onRestart }: { data: ReflectionData; onRestar
   };
 
   const handleDownload = () => {
-    openPrintableSummary(t.map.title, formatDataAsText());
+    savePrintableSummary(data, language);
+    const printable = window.open(`${appHref("/print-summary")}?print=1`, "_blank", "noopener,noreferrer,width=980,height=1180");
+    if (!printable) {
+      navigateToAppPath("/print-summary");
+    }
     toast({ title: t.save.downloadedTitle, description: t.save.downloadedText });
   };
 

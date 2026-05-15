@@ -24,6 +24,27 @@
     />
     <meta name="twitter:image" content="https://tina-boettger.com/New%20Picture.webp" />
     <link rel="canonical" href="https://tina-boettger.com/" />
+    <script>
+      (() => {
+        const routes = [
+          "/blog/human-first-ai-machine-consciousness",
+          "/inner-compass",
+          "/print-summary",
+          "/for-agents",
+          "/legal-notice",
+          "/datenschutz",
+          "/impressum",
+          "/privacy",
+          "/blog",
+        ];
+        const path = window.location.pathname.replace(/\/$/, "") || "/";
+        const route = routes.find((candidate) => path === candidate || path.endsWith(candidate));
+        if (!route) return;
+        const appBase = path.slice(0, path.length - route.length) || "/";
+        const base = appBase.endsWith("/") ? appBase : `${appBase}/`;
+        document.write(`<base href="${base}">`);
+      })();
+    </script>
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -60,8 +81,8 @@
         ]
       }
     </script>
-    <link rel="preload" href="/New Picture.webp" as="image" />
-    <link rel="preload" href="/Horizontal picture.webp" as="image" />
+    <link rel="preload" href="./New%20Picture.webp" as="image" />
+    <link rel="preload" href="./Horizontal%20picture.webp" as="image" />
   </head>
   <body>
     <div id="root"></div>

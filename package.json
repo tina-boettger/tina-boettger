@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
-    "build": "vite build",
+    "build": "vite build && node scripts/create-static-routes.mjs",
     "preview": "vite preview",
+    "deploy:ftp": "powershell -ExecutionPolicy Bypass -File ./scripts/deploy-ftp.ps1",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "lint": "tsc --noEmit"
   },

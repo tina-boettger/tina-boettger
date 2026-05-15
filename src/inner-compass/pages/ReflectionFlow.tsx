@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "../contexts/LanguageContext";
 import { translations } from "../lib/translations";
+import { getDemoReflectionData } from "../lib/printSummary";
 import type { ReflectionData } from "../types/reflection";
 import { Button } from "../components/ui/Button";
 import { AccessibilityMenu } from "../components/AccessibilityMenu";
@@ -24,16 +25,11 @@ const emptyData = (): ReflectionData => ({
 export default function ReflectionFlow() {
   const [step, setStep] = useState(0);
   const [reflectionData, setReflectionData] = useState<ReflectionData>(emptyData);
+  const [pendingResume, setPendingResume] = useState<{ data: ReflectionData; step: number } | null>(null);
   const { language } = useLanguage();
   const t = translations[language];
-
-  const getDemoData = (): ReflectionData => ({
-    energy: { selected: [t.words.energy.building, t.words.energy.solving, t.words.energy.organizing], custom: "" },
-    strengths: { selected: [t.words.strengths.clarity, t.words.strengths["systems-thinking"], t.words.strengths.persistence], custom: "" },
-    impact: { selected: [t.words.impact.clarity, t.words.impact.reliability, t.words.impact.order], custom: "" },
-    recognition: { selected: [t.words.recognition.speed, t.words.recognition.flexibility, t.words.recognition.talking], custom: "" },
-    environment: { selected: [t.words.environment["clear tasks"], t.words.environment.autonomy, t.words.environment["helpful feedback"]], custom: "" },
-  });
+  const resumeConfirmLabel = t.welcome.resumeConfirm || (language === "de" ? "Fortsetzen" : "Resume");
+  const resumeCancelLabel = t.welcome.resumeCancel || (language === "de" ? "Neu beginnen" : "Start Fresh");
 
   useEffect(() => {
     const saved = localStorage.getItem("reflection-data");
@@ -41,19 +37,13 @@ export default function ReflectionFlow() {
     if (saved && savedStep) {
       try {
         const parsed = JSON.parse(saved);
-        if (window.confirm(t.welcome.resumeDescription)) {
-          setReflectionData(parsed);
-          setStep(Number(savedStep));
-        } else {
-          localStorage.removeItem("reflection-data");
-          localStorage.removeItem("reflection-step");
-        }
+        setPendingResume({ data: parsed, step: Number(savedStep) });
       } catch {
         localStorage.removeItem("reflection-data");
         localStorage.removeItem("reflection-step");
       }
     }
-  }, [t.welcome.resumeDescription]);
+  }, []);
 
   useEffect(() => {
     if (step > 0) {
@@ -69,8 +59,22 @@ export default function ReflectionFlow() {
   const restart = () => {
     localStorage.removeItem("reflection-data");
     localStorage.removeItem("reflection-step");
+    setPendingResume(null);
     setReflectionData(emptyData());
     setStep(0);
+  };
+
+  const continueSavedReflection = () => {
+    if (!pendingResume) return;
+    setReflectionData(pendingResume.data);
+    setStep(pendingResume.step);
+    setPendingResume(null);
+  };
+
+  const discardSavedReflection = () => {
+    localStorage.removeItem("reflection-data");
+    localStorage.removeItem("reflection-step");
+    setPendingResume(null);
   };
 
   const renderSelection = (
@@ -113,20 +117,44 @@ export default function ReflectionFlow() {
       <div className="fixed top-4 left-24 z-[70]">
         <AccessibilityMenu />
       </div>
+      {pendingResume ? (
+        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-background/80 px-6 backdrop-blur-sm">
+          <div className="w-full max-w-[480px] rounded-2xl border border-foreground/10 bg-card p-7 shadow-[var(--shadow-lift)]">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="block h-px w-10 bg-primary" />
+              <span className="eyebrow">Resume</span>
+            </div>
+            <h2 className="mb-3 font-serif text-3xl leading-tight text-foreground">{t.welcome.resumeTitle}</h2>
+            <p className="mb-6 text-muted-foreground leading-relaxed">{t.welcome.resumeDescription}</p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button onClick={continueSavedReflection} size="lg" className="flex-1 text-primary-foreground" aria-label={resumeConfirmLabel}>
+                <span>{resumeConfirmLabel}</span>
+              </Button>
+              <Button onClick={discardSavedReflection} variant="outline" size="lg" className="flex-1 text-foreground" aria-label={resumeCancelLabel}>
+                <span>{resumeCancelLabel}</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {step === 0 ? (
         <ScreenContainer>
-          <div className="w-full max-w-[640px] mx-auto animate-fade-in pb-8 px-6">
-            <div className="flex items-center gap-3 mb-6">
+          <div className="w-full max-w-[640px] mx-auto animate-fade-in px-6">
+            <div className="flex items-center gap-3 mb-4">
               <span className="block w-10 h-px bg-primary" />
               <span className="eyebrow">Reflection</span>
             </div>
-            <h1 className="font-serif text-5xl md:text-6xl mb-6 text-foreground leading-[1.05]">{t.welcome.title}</h1>
-            <p className="text-lg text-muted-foreground mb-10 leading-relaxed max-w-[520px]">{t.welcome.subtitle}</p>
-            <div className="space-y-8 mb-10">
-              <div className="p-8 bg-card border border-foreground/10 rounded-2xl">
-                <h2 className="font-serif text-2xl mb-5 text-primary">{t.welcome.expectTitle}</h2>
-                <ul className="space-y-3 text-base text-muted-foreground">
+            <h1 className="font-serif text-4xl md:text-5xl mb-4 text-foreground leading-[1.02]">{t.welcome.title}</h1>
+            <p className="text-base md:text-lg text-muted-foreground mb-6 leading-relaxed max-w-[520px]">{t.welcome.subtitle}</p>
+            <div className="mb-6 rounded-2xl border border-foreground/10 bg-card p-6 md:p-7">
+              <h2 className="font-serif text-2xl mb-3 text-primary">{t.welcome.introTitle}</h2>
+              <div className="text-sm md:text-base text-muted-foreground leading-relaxed">
+                <p>{t.welcome.introBody}</p>
+              </div>
+              <div className="mt-5 border-t border-foreground/10 pt-5">
+                <h2 className="font-serif text-2xl mb-4 text-primary">{t.welcome.expectTitle}</h2>
+                <ul className="grid gap-2 text-sm md:text-base text-muted-foreground">
                   {t.welcome.expectItems.map((item) => (
                     <li key={item} className="flex gap-4 items-center">
                       <span aria-hidden className="block w-6 h-px bg-primary/60 shrink-0" />
@@ -138,7 +166,7 @@ export default function ReflectionFlow() {
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <Button onClick={() => setStep(1)} size="lg">{t.welcome.startButton}</Button>
-              <Button onClick={() => { setReflectionData(getDemoData()); setStep(6); }} variant="outline" size="lg">{t.welcome.loadDemo}</Button>
+              <Button onClick={() => { setReflectionData(getDemoReflectionData(language)); setStep(6); }} variant="outline" size="lg">{t.welcome.loadDemo}</Button>
             </div>
           </div>
         </ScreenContainer>

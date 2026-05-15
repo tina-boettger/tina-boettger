@@ -24,16 +24,20 @@ import {
   Plus
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
+import { BLOG_ARTICLE, BLOG_ARTICLE_PATH, BlogArticlePage, BlogIndexPage, PublicationCard } from "./BlogPages";
 import ForAgentsPage from "./ForAgentsPage";
 import InnerCompassPage from "./inner-compass/InnerCompassPage";
+import PrintSummaryPage from "./inner-compass/pages/PrintSummaryPage";
 import LegalLinks from "./LegalLinks";
+import { appAssetUrl, appHref, navigateToAppPath, normalizeRoutePath } from "./lib/routing";
 import { buildPersonSchema, buildWebsiteSchema, SITE_URL, usePageSeo } from "./lib/seo";
 
 const NAV_LINKS = (t: any) => [
   { name: t.nav.references, href: "#references" },
   { name: t.nav.topics, href: "#topics" },
+  { name: t.nav.blog, href: "#publications" },
   { name: t.nav.about, href: "#about" },
-  { name: t.nav.resources, href: "#resources" },
+  { name: t.nav.contact, href: "#contact" },
 ];
 
 const TRANSLATIONS: any = {
@@ -42,7 +46,9 @@ const TRANSLATIONS: any = {
       about: "About",
       topics: "Topics",
       resources: "Resources",
+      blog: "Blog",
       references: "References",
+      contact: "Contact",
       button: "Try my Inner Compass"
     },
     hero: {
@@ -133,6 +139,11 @@ const TRANSLATIONS: any = {
         button: "Send Message"
       }
     },
+    blog: {
+      tag: "Insights & Writing",
+      headline: "Latest Publications.",
+      readAll: "Read all"
+    },
     footer: {
       tag: "© 2024 Tina Böttger — Human-First AI Leader",
       privacy: "Privacy Policy",
@@ -144,7 +155,9 @@ const TRANSLATIONS: any = {
       about: "Über mich",
       topics: "Themen",
       resources: "Ressourcen",
+      blog: "Blog",
       references: "Referenzen",
+      contact: "Kontakt",
       button: "Finde deinen inneren Kompass"
     },
     hero: {
@@ -235,6 +248,11 @@ const TRANSLATIONS: any = {
         message: "Erzähl mir von deinem Projekt oder Event",
         button: "Nachricht senden"
       }
+    },
+    blog: {
+      tag: "Insights & Writing",
+      headline: "Latest Publications.",
+      readAll: "Alle lesen"
     },
     footer: {
       tag: "© 2024 Tina Böttger — Human-First AI Leader",
@@ -443,14 +461,11 @@ function HomePage() {
       localStorage.setItem("inner-compass-language", lang);
     }
 
-    if (window.location.pathname === path) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
+    navigateToAppPath(path);
+  };
 
-    window.history.pushState({}, "", path);
-    window.dispatchEvent(new PopStateEvent("popstate"));
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const navigateToBlog = (path = "/blog") => {
+    navigateToAppPath(path);
   };
 
   const legalPath = {
@@ -493,8 +508,8 @@ function HomePage() {
                   {link.name}
                 </a>
               ))}
-              <a 
-                href={t.resources.compass_url} 
+              <a
+                href={appHref(t.resources.compass_url)}
                 onClick={(e) => {
                   e.preventDefault();
                   navigateToPath(t.resources.compass_url);
@@ -542,7 +557,7 @@ function HomePage() {
               </a>
             ))}
             <a
-              href={t.resources.compass_url}
+              href={appHref(t.resources.compass_url)}
               onClick={(e) => {
                 setIsMenuOpen(false);
                 e.preventDefault();
@@ -614,9 +629,9 @@ function HomePage() {
             transition={{ duration: 1.5 }}
           >
             <div className="relative w-full h-full mix-blend-darken">
-              <img 
-                src="/New%20Picture.webp" 
-                alt="Tina Böttger" 
+              <img
+                src={appAssetUrl("/New%20Picture.webp")}
+                alt="Tina Böttger"
                 className="w-full h-full object-cover object-[70%_top] sm:object-center lg:object-right-bottom opacity-80 lg:opacity-100"
                 referrerPolicy="no-referrer"
                 loading="eager"
@@ -673,14 +688,14 @@ function HomePage() {
               onAnimationComplete={handleAnimationComplete}
             >
               {EXTENDED_MOMENTS.map((moment, idx) => (
-                <div 
+                <div
                   key={`${moment.title}-${idx}`}
                   className="flex-shrink-0 px-3 w-full md:w-1/2 lg:w-1/3 group"
                 >
                   <div className="aspect-[4/5] rounded-[4px] overflow-hidden border border-brand-line mb-6 relative bg-brand-charcoal/[0.03]">
-                    <img 
-                      src={moment.image} 
-                      alt={moment.title} 
+                    <img
+                      src={appAssetUrl(moment.image)}
+                      alt={moment.title}
                       className="w-full h-full object-cover object-top grayscale brightness-90 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-700"
                       referrerPolicy="no-referrer"
                       loading="eager"
@@ -750,9 +765,9 @@ function HomePage() {
               className="block md:col-span-5 mb-8 md:mb-0"
             >
               <div className="rounded-[8px] overflow-hidden h-full min-h-[320px] md:min-h-[520px] relative border border-brand-line">
-                <img 
-                  src="/Horizontal%20picture.webp" 
-                  alt="Tina Böttger" 
+                <img
+                  src={appAssetUrl("/Horizontal%20picture.webp")}
+                  alt="Tina Böttger"
                   className="w-full h-full object-cover object-top"
                   referrerPolicy="no-referrer"
                   loading="eager"
@@ -809,6 +824,34 @@ function HomePage() {
         </div>
       </section>
 
+      {/* Blog Section */}
+      <section id="publications" className="py-16 md:py-28 border-t border-brand-line bg-brand-paper">
+        <div className="max-w-7xl mx-auto px-6 md:px-12">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-12 md:mb-16">
+            <div>
+              <span className="text-brand-green text-[12px] font-bold tracking-[0.1em] uppercase mb-4 block">{t.blog.tag}</span>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif leading-[1.1]">{t.blog.headline}</h2>
+            </div>
+            <a
+              href={appHref("/blog")}
+              onClick={(e) => {
+                e.preventDefault();
+                navigateToBlog("/blog");
+              }}
+              className="inline-flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-brand-green border-b border-brand-green pb-2 hover:text-brand-charcoal hover:border-brand-charcoal transition-colors w-fit"
+            >
+              {t.blog.readAll} <ChevronRight className="w-4 h-4" />
+            </a>
+          </div>
+          <div className="max-w-md">
+            <PublicationCard compact />
+          </div>
+          <p className="sr-only">
+            Latest publication: {BLOG_ARTICLE.title}. {BLOG_ARTICLE.excerpt}
+          </p>
+        </div>
+      </section>
+
       {/* Resources Section */}
       <section id="resources" className="py-14 md:py-20 border-t border-brand-line bg-brand-paper">
         <div className="max-w-7xl mx-auto px-6 md:px-12 grid md:grid-cols-2 gap-10 md:gap-16 items-start">
@@ -827,7 +870,7 @@ function HomePage() {
                 {t.resources.compass_desc}
               </p>
               <a 
-                href={t.resources.compass_url}
+                href={appHref(t.resources.compass_url)}
                 onClick={(e) => {
                   e.preventDefault();
                   navigateToPath(t.resources.compass_url);
@@ -970,7 +1013,7 @@ function HomePage() {
           
           <div className="flex gap-12 text-[10px] uppercase font-bold tracking-[0.05em] text-brand-muted">
             <a
-              href={legalPath.privacy}
+              href={appHref(legalPath.privacy)}
               onClick={(e) => {
                 e.preventDefault();
                 navigateToPath(legalPath.privacy);
@@ -980,7 +1023,7 @@ function HomePage() {
               {t.footer.privacy}
             </a>
             <a
-              href={legalPath.notice}
+              href={appHref(legalPath.notice)}
               onClick={(e) => {
                 e.preventDefault();
                 navigateToPath(legalPath.notice);
@@ -994,14 +1037,6 @@ function HomePage() {
       </footer>
     </div>
   );
-}
-
-function normalizePath(pathname: string) {
-  if (!pathname || pathname === "/") {
-    return "/";
-  }
-
-  return pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
 }
 
 const legalOwner = {
@@ -1036,15 +1071,13 @@ function LegalPage({ type, language }: { type: "impressum" | "privacy"; language
 
   const goHome = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    window.history.pushState({}, "", "/");
-    window.dispatchEvent(new PopStateEvent("popstate"));
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    navigateToAppPath("/");
   };
 
   return (
     <div className="min-h-screen bg-brand-paper text-brand-charcoal px-6 py-20 md:px-12">
       <a
-        href="/"
+        href={appHref("/")}
         onClick={goHome}
         className="fixed top-4 right-4 z-50 inline-flex items-center gap-2 rounded-full border border-brand-line bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] hover:border-brand-green hover:text-brand-green"
       >
@@ -1171,7 +1204,7 @@ function ImpressumContentEn() {
 
       <LegalSection title="German Version">
         <p>
-          This English version is provided for convenience. The German Impressum at <a className="text-brand-green underline" href="/impressum">/impressum</a> is the legally primary version.
+          This English version is provided for convenience. The German Impressum at <a className="text-brand-green underline" href={appHref("/impressum")}>/impressum</a> is the legally primary version.
         </p>
       </LegalSection>
     </div>
@@ -1301,7 +1334,7 @@ function PrivacyContentEn() {
 
       <LegalSection title="German Version">
         <p>
-          This English version is provided for convenience. The German Datenschutz page at <a className="text-brand-green underline" href="/datenschutz">/datenschutz</a> is the legally primary version.
+          This English version is provided for convenience. The German Datenschutz page at <a className="text-brand-green underline" href={appHref("/datenschutz")}>/datenschutz</a> is the legally primary version.
         </p>
       </LegalSection>
 
@@ -1313,9 +1346,7 @@ function PrivacyContentEn() {
 function NotFoundPage() {
   const goHome = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    window.history.pushState({}, "", "/");
-    window.dispatchEvent(new PopStateEvent("popstate"));
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    navigateToAppPath("/");
   };
 
   return (
@@ -1326,7 +1357,7 @@ function NotFoundPage() {
         </p>
         <h1 className="text-4xl md:text-5xl font-serif mb-6">This page does not exist.</h1>
         <a
-          href="/"
+          href={appHref("/")}
           onClick={goHome}
           className="inline-flex items-center gap-3 bg-brand-green text-brand-paper px-6 py-3 rounded-[4px] text-sm font-semibold uppercase tracking-[0.1em]"
         >
@@ -1338,10 +1369,10 @@ function NotFoundPage() {
 }
 
 export default function App() {
-  const [pathname, setPathname] = useState(() => normalizePath(window.location.pathname));
+  const [pathname, setPathname] = useState(() => normalizeRoutePath());
 
   useEffect(() => {
-    const handleRouteChange = () => setPathname(normalizePath(window.location.pathname));
+    const handleRouteChange = () => setPathname(normalizeRoutePath());
     window.addEventListener("popstate", handleRouteChange);
     return () => window.removeEventListener("popstate", handleRouteChange);
   }, []);
@@ -1350,8 +1381,20 @@ export default function App() {
     return <InnerCompassPage />;
   }
 
+  if (pathname === "/print-summary") {
+    return <PrintSummaryPage />;
+  }
+
   if (pathname === "/for-agents") {
     return <ForAgentsPage />;
+  }
+
+  if (pathname === "/blog") {
+    return <BlogIndexPage />;
+  }
+
+  if (pathname === BLOG_ARTICLE_PATH) {
+    return <BlogArticlePage />;
   }
 
   if (pathname === "/impressum") {

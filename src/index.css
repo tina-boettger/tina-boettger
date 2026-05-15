@@ -79,6 +79,11 @@
   body {
     @apply bg-brand-paper text-brand-charcoal font-sans antialiased;
   }
+
+  body.is-inner-compass {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
   
   h1, h2, h3, h4 {
     @apply font-serif;

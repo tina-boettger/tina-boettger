@@ -1,5 +1,7 @@
 import { Download } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
+import { appHref, navigateToAppPath } from "../../lib/routing";
+import { savePrintableSummary } from "../lib/printSummary";
 import { translations } from "../lib/translations";
 import type { ReflectionData } from "../types/reflection";
 import { Button } from "../components/ui/Button";
@@ -8,33 +10,6 @@ import { FoxCompanion } from "../components/FoxCompanion";
 import { ScreenContainer } from "../components/ScreenContainer";
 import { StickyNoteCard } from "../components/StickyNoteCard";
 import { cn } from "../lib/utils";
-
-function openPrintableMap(title: string, cards: Array<{ title: string; words: string[] }>, environmentLabel: string, environmentWords: string[], fitLabel: string) {
-  const printable = window.open("", "_blank", "noopener,noreferrer,width=900,height=1100");
-  if (!printable) return;
-
-  printable.document.write(`
-    <html>
-      <head>
-        <title>${title}</title>
-        <style>
-          body { font-family: Inter, Arial, sans-serif; padding: 32px; color: #1c1c1c; }
-          h1, h2 { font-family: "Playfair Display", Georgia, serif; }
-          .card { border: 1px solid rgba(28,28,28,.12); border-radius: 18px; padding: 20px; margin-bottom: 16px; }
-          .pill { display: inline-block; border: 1px solid rgba(28,28,28,.12); border-radius: 999px; padding: 6px 12px; margin: 4px; font-size: 14px; }
-        </style>
-      </head>
-      <body>
-        <h1>${title}</h1>
-        ${cards.map((card) => `<div class="card"><h2>${card.title}</h2>${card.words.map((word) => `<span class="pill">${word}</span>`).join("")}</div>`).join("")}
-        <div class="card"><h2>${environmentLabel}: ${fitLabel}</h2>${environmentWords.map((word) => `<span class="pill">${word}</span>`).join("")}</div>
-      </body>
-    </html>
-  `);
-  printable.document.close();
-  printable.focus();
-  printable.print();
-}
 
 export function MapDisplay({ data, onNext, onBack }: { data: ReflectionData; onNext: () => void; onBack: () => void }) {
   const { language } = useLanguage();
@@ -139,15 +114,13 @@ export function MapDisplay({ data, onNext, onBack }: { data: ReflectionData; onN
 
         <div className="flex flex-col sm:flex-row gap-3">
           <Button
-            onClick={() =>
-              openPrintableMap(
-                t.map.title,
-                categoryData.map(({ key, label }) => ({ title: label, words: [...data[key].selected, data[key].custom].filter(Boolean) })),
-                t.map.environmentFit,
-                environmentWords,
-                fitLabel,
-              )
-            }
+            onClick={() => {
+              savePrintableSummary(data, language);
+              const printable = window.open(`${appHref("/print-summary")}?print=1`, "_blank", "noopener,noreferrer,width=980,height=1180");
+              if (!printable) {
+                navigateToAppPath("/print-summary");
+              }
+            }}
             variant="outline"
             size="lg"
             className="gap-2"

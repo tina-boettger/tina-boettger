@@ -1,18 +1,44 @@
 import { ArrowLeft } from "lucide-react";
+import { useEffect } from "react";
 import { AccessibilityProvider } from "./contexts/AccessibilityContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import LegalLinks from "../LegalLinks";
 import Toaster from "./components/Toaster";
 import ReflectionFlow from "./pages/ReflectionFlow";
+import { navigateToAppPath } from "../lib/routing";
 import { SITE_URL, buildPersonSchema, buildWebsiteSchema, usePageSeo } from "../lib/seo";
 
 function navigateHome() {
-  window.history.pushState({}, "", "/");
-  window.dispatchEvent(new PopStateEvent("popstate"));
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  navigateToAppPath("/");
 }
 
 export default function InnerCompassPage() {
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+
+    html.classList.remove("is-print-summary");
+    body.classList.remove("is-print-summary");
+    body.classList.add("is-inner-compass");
+
+    html.style.removeProperty("width");
+    body.style.removeProperty("width");
+    html.style.removeProperty("min-height");
+    body.style.removeProperty("min-height");
+    html.style.overflowX = "hidden";
+    body.style.overflowX = "hidden";
+    html.style.overflowY = "auto";
+    body.style.overflowY = "auto";
+
+    return () => {
+      body.classList.remove("is-inner-compass");
+      html.style.removeProperty("overflow-x");
+      body.style.removeProperty("overflow-x");
+      html.style.removeProperty("overflow-y");
+      body.style.removeProperty("overflow-y");
+    };
+  }, []);
+
   usePageSeo({
     title: "Inner Compass | Tina Boettger",
     description:

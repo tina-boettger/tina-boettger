@@ -1,11 +1,10 @@
 import { ArrowLeft } from "lucide-react";
 import LegalLinks from "./LegalLinks";
+import { navigateToAppPath } from "./lib/routing";
 import { buildPersonSchema, buildWebsiteSchema, SITE_URL, usePageSeo } from "./lib/seo";
 
 function navigateHome() {
-  window.history.pushState({}, "", "/");
-  window.dispatchEvent(new PopStateEvent("popstate"));
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  navigateToAppPath("/");
 }
 
 export default function ForAgentsPage() {

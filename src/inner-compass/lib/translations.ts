@@ -3,12 +3,18 @@ export const translations = {
     welcome: {
       title: "Inner Compass",
       subtitle: "A short reflection on what energizes you, what you're good at, and what feels aligned.",
+      introTitle: "Human-first AI begins with human clarity.",
+      introBody:
+        "The Inner Compass is a short reflection designed to make your human layer visible before technology starts to assist, optimize, or automate. It helps you name what gives you energy, where your strengths show up, how you create impact, what kind of recognition feels meaningful, and which environment helps you do your best work.",
+      introNote:
+        "This map is not a diagnosis, a score, or a fixed identity. It is a snapshot of alignment: a reminder of what helps you stay grounded, intentional, and human while everything around you gets faster.",
       expectTitle: "What to expect:",
       expectItems: [
         "Pick words that resonate across 5 areas",
         "See patterns in your work preferences",
         "Get clarity on your working style",
         "Takes about 10 minutes",
+        "This is not a fixed identity or diagnosis, just a snapshot.",
       ],
       startButton: "Start reflection",
       loadDemo: "Load Demo",
@@ -336,12 +342,18 @@ export const translations = {
     welcome: {
       title: "Dein Innerer Kompass",
       subtitle: "Finde deinen inneren Kompass: eine kurze Übung dazu, was dir Energie gibt, was du gut kannst und was sich für dich richtig anfühlt.",
+      introTitle: "Human-first AI beginnt mit menschlicher Klarheit.",
+      introBody:
+        "Der Inner Compass ist eine kurze Reflexion, die sichtbar macht, was dich als Mensch ausrichtet, bevor Technologie unterstützt, optimiert oder automatisiert. Er hilft dir zu benennen, was dir Energie gibt, wo deine Stärken liegen, wie du Wirkung erzeugst, welche Anerkennung für dich bedeutsam ist und welches Umfeld dir hilft, gut zu arbeiten.",
+      introNote:
+        "Diese Karte ist keine Diagnose, keine Bewertung und keine feste Identität. Sie ist eine Momentaufnahme deiner Ausrichtung: eine Erinnerung daran, was dir hilft, geerdet, bewusst und menschlich zu bleiben, während um dich herum alles schneller wird.",
       expectTitle: "Was dich erwartet:",
       expectItems: [
         "Wähle in 5 Bereichen Begriffe, die zu dir passen",
         "Entdecke Muster in deiner Art zu arbeiten",
         "Werde dir klarer über das, was dir wichtig ist",
         "Dauert etwa 10 Minuten",
+        "Das ist keine feste Identität oder Diagnose, sondern eine Momentaufnahme.",
       ],
       startButton: "Reflexion starten",
       loadDemo: "Demo laden",
