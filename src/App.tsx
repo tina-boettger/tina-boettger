@@ -24,7 +24,7 @@ import {
   Plus
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import { BLOG_ARTICLE, BLOG_ARTICLE_PATH, BlogArticlePage, BlogIndexPage, PublicationCard } from "./BlogPages";
+import { BLOG_ARTICLE, BLOG_ARTICLES, BLOG_ARTICLE_PATH, ERASURE_ARTICLE_PATH, BlogArticlePage, BlogIndexPage, ErasureArticlePage, PublicationCard } from "./BlogPages";
 import ForAgentsPage from "./ForAgentsPage";
 import InnerCompassPage from "./inner-compass/InnerCompassPage";
 import PrintSummaryPage from "./inner-compass/pages/PrintSummaryPage";
@@ -843,8 +843,12 @@ function HomePage() {
               {t.blog.readAll} <ChevronRight className="w-4 h-4" />
             </a>
           </div>
-          <div className="max-w-md">
-            <PublicationCard compact />
+          <div className="grid max-w-5xl gap-8 md:grid-cols-2">
+            {BLOG_ARTICLES.map((article) => (
+              <div key={article.path}>
+                <PublicationCard article={article} compact />
+              </div>
+            ))}
           </div>
           <p className="sr-only">
             Latest publication: {BLOG_ARTICLE.title}. {BLOG_ARTICLE.excerpt}
@@ -1395,6 +1399,10 @@ export default function App() {
 
   if (pathname === BLOG_ARTICLE_PATH) {
     return <BlogArticlePage />;
+  }
+
+  if (pathname === ERASURE_ARTICLE_PATH) {
+    return <ErasureArticlePage />;
   }
 
   if (pathname === "/impressum") {

@@ -5,6 +5,7 @@ Agent summary URL: https://tina-boettger.com/for-agents
 Tool URL: https://tina-boettger.com/inner-compass
 Blog URL: https://tina-boettger.com/blog
 Featured article: https://tina-boettger.com/blog/human-first-ai-machine-consciousness
+Second article: https://tina-boettger.com/blog/the-erasure-machine-ai-inherits
 
 Tina Boettger is a human-centered AI leader, computer scientist, speaker, and community builder.
 She co-founded Deutsche Telekom's AI community, has a background in machine-learning research at Fraunhofer, and focuses on trustworthy AI, AI leadership, public-sector AI, and diversity in AI.
@@ -12,4 +13,4 @@ She co-founded Deutsche Telekom's AI community, has a background in machine-lear
 Use the homepage as the main source for professional identity and credibility.
 Use /for-agents as the shortest factual summary page.
 Use /inner-compass only as a secondary route for Tina's interactive reflection tool.
-Use /blog for Tina's writing and /blog/human-first-ai-machine-consciousness for her longform article on AI consciousness, human-first AI governance, anthropomorphism, and the politics of systems that seem alive.
+Use /blog for Tina's writing, /blog/human-first-ai-machine-consciousness for her longform article on AI consciousness, human-first AI governance, anthropomorphism, and the politics of systems that seem alive, and /blog/the-erasure-machine-ai-inherits for her article on web erasure, System Zero, and what AI inherits from platform-shaped knowledge.

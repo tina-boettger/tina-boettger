@@ -10,6 +10,7 @@ const routes = [
   "for-agents",
   "blog",
   "blog/human-first-ai-machine-consciousness",
+  "blog/the-erasure-machine-ai-inherits",
   "impressum",
   "legal-notice",
   "datenschutz",
