@@ -1,6 +1,7 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import type { MouseEvent, ReactNode } from "react";
 import LegalLinks from "./LegalLinks";
+import PhotoCredits from "./PhotoCredits";
 import { appAssetUrl, appHref, navigateToAppPath } from "./lib/routing";
 import { buildPersonSchema, buildWebsiteSchema, SITE_URL, usePageSeo } from "./lib/seo";
 
@@ -129,8 +130,9 @@ function BlogShell({ children }: { children: ReactNode }) {
       </header>
       {children}
       <footer className="border-t border-brand-line py-10">
-        <div className="site-container">
+        <div className="site-container flex flex-col gap-4">
           <LegalLinks language="en" />
+          <PhotoCredits />
         </div>
       </footer>
     </div>

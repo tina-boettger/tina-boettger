@@ -29,6 +29,7 @@ import ForAgentsPage from "./ForAgentsPage";
 import InnerCompassPage from "./inner-compass/InnerCompassPage";
 import PrintSummaryPage from "./inner-compass/pages/PrintSummaryPage";
 import LegalLinks from "./LegalLinks";
+import PhotoCredits from "./PhotoCredits";
 import { appAssetUrl, appHref, navigateToAppPath, normalizeRoutePath } from "./lib/routing";
 import { buildPersonSchema, buildWebsiteSchema, SITE_URL, usePageSeo } from "./lib/seo";
 
@@ -636,10 +637,6 @@ function HomePage() {
                 referrerPolicy="no-referrer"
                 loading="eager"
               />
-              <p className="absolute bottom-3 right-4 z-10 text-[9px] font-semibold uppercase tracking-[0.14em] text-brand-charcoal/45">
-                Photo &copy; G&uuml;nther Naderer
-              </p>
-
               {/* Fade for mobile text readability */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#F6F4F0] via-transparent to-transparent lg:hidden"></div>
               <div className="absolute inset-0 bg-gradient-to-r from-[#F6F4F0] via-[#F6F4F0]/20 to-transparent lg:hidden"></div>
@@ -706,7 +703,6 @@ function HomePage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-brand-charcoal/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   </div>
                   <p className="text-sm font-bold uppercase tracking-widest text-brand-charcoal">{moment.title}</p>
-                  <p className="site-credit">Photo &copy; G&uuml;nther Naderer</p>
                 </div>
               ))}
             </motion.div>
@@ -1015,8 +1011,9 @@ function HomePage() {
       {/* Footer */}
       <footer className="py-8 md:py-12 border-t border-brand-line bg-brand-paper">
         <div className="site-container flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex gap-10 text-center md:text-left">
+          <div className="flex flex-col gap-2 text-center md:text-left">
             <span className="text-[10px] font-bold uppercase tracking-[0.05em] text-brand-muted">{t.footer.tag}</span>
+            <PhotoCredits />
           </div>
           
           <div className="flex gap-12 text-[10px] uppercase font-bold tracking-[0.05em] text-brand-muted">
@@ -1120,6 +1117,9 @@ function LegalPage({ type, language }: { type: "impressum" | "privacy"; language
 
         <footer className="mt-16 border-t border-brand-line pt-8">
           <LegalLinks language={language} />
+          <div className="mt-4">
+            <PhotoCredits />
+          </div>
         </footer>
       </main>
     </div>

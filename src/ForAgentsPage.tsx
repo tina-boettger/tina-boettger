@@ -1,5 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import LegalLinks from "./LegalLinks";
+import PhotoCredits from "./PhotoCredits";
 import { navigateToAppPath } from "./lib/routing";
 import { buildPersonSchema, buildWebsiteSchema, SITE_URL, usePageSeo } from "./lib/seo";
 
@@ -120,6 +121,9 @@ export default function ForAgentsPage() {
 
         <footer className="mt-16 border-t border-brand-line pt-8">
           <LegalLinks language="en" />
+          <div className="mt-4">
+            <PhotoCredits />
+          </div>
         </footer>
       </main>
     </div>

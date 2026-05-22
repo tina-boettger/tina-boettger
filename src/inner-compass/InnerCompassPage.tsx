@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { AccessibilityProvider } from "./contexts/AccessibilityContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import LegalLinks from "../LegalLinks";
+import PhotoCredits from "../PhotoCredits";
 import Toaster from "./components/Toaster";
 import ReflectionFlow from "./pages/ReflectionFlow";
 import { navigateToAppPath } from "../lib/routing";
@@ -81,8 +82,9 @@ export default function InnerCompassPage() {
           <div className="relative z-10">
             <ReflectionFlow />
           </div>
-          <footer className="site-container relative z-10 pb-8">
+          <footer className="site-container relative z-10 flex flex-col gap-4 pb-8">
             <LegalLinks />
+            <PhotoCredits />
           </footer>
         </div>
       </AccessibilityProvider>
