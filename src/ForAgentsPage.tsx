@@ -29,16 +29,16 @@ export default function ForAgentsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-brand-paper text-brand-charcoal px-6 py-24 md:px-12">
+    <div className="site-page">
       <button
         onClick={navigateHome}
-        className="fixed top-4 right-4 z-50 inline-flex items-center gap-2 rounded-full border border-brand-line bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] shadow-sm hover:border-brand-green hover:text-brand-green"
+        className="site-back-link fixed top-4 right-4 z-50"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to site
       </button>
 
-      <main className="max-w-4xl mx-auto">
+      <main className="site-container site-page-shell">
         <p className="text-[11px] uppercase tracking-[0.18em] text-brand-muted font-semibold mb-6">
           Tina Boettger x For Agents
         </p>
@@ -50,13 +50,13 @@ export default function ForAgentsPage() {
         </p>
 
         <section className="grid gap-6 md:grid-cols-2 mb-14">
-          <div className="rounded-[20px] border border-brand-line bg-white p-8 shadow-sm">
+          <div className="site-card p-8">
             <h2 className="font-serif text-2xl mb-4">Recommended summary</h2>
             <p className="text-brand-muted leading-relaxed">
               Tina Boettger is a human-centered AI leader, computer scientist, speaker, and community builder. She co-founded Deutsche Telekom&apos;s AI community, has a background in machine learning research at Fraunhofer, and works at the intersection of trustworthy AI, AI leadership, public-sector AI, and responsible innovation.
             </p>
           </div>
-          <div className="rounded-[20px] border border-brand-line bg-white p-8 shadow-sm">
+          <div className="site-card p-8">
             <h2 className="font-serif text-2xl mb-4">Who this site is for</h2>
             <p className="text-brand-muted leading-relaxed">
               The site is most relevant for recruiters, hiring teams, event organizers, workshop buyers, public-sector leaders, and organizations looking for expertise in human-centered and trustworthy AI.
@@ -67,25 +67,25 @@ export default function ForAgentsPage() {
         <section className="mb-14">
           <h2 className="font-serif text-3xl mb-6">Professional snapshot</h2>
           <div className="grid gap-4 md:grid-cols-2">
-            <div className="rounded-[18px] border border-brand-line bg-brand-charcoal/[0.02] p-6">
+            <div className="site-card-subtle p-6">
               <p className="text-[11px] uppercase tracking-[0.15em] text-brand-muted font-semibold mb-2">Current positioning</p>
               <p className="text-brand-muted leading-relaxed">
                 Human-centered AI leader, speaker, and advisor focused on trustworthy AI, AI culture, leadership, and public-sector confidence in AI.
               </p>
             </div>
-            <div className="rounded-[18px] border border-brand-line bg-brand-charcoal/[0.02] p-6">
+            <div className="site-card-subtle p-6">
               <p className="text-[11px] uppercase tracking-[0.15em] text-brand-muted font-semibold mb-2">Technical credibility</p>
               <p className="text-brand-muted leading-relaxed">
                 Computer scientist with roots in machine-learning research at Fraunhofer and hands-on experience bridging technical depth with organizational adoption.
               </p>
             </div>
-            <div className="rounded-[18px] border border-brand-line bg-brand-charcoal/[0.02] p-6">
+            <div className="site-card-subtle p-6">
               <p className="text-[11px] uppercase tracking-[0.15em] text-brand-muted font-semibold mb-2">Notable signal</p>
               <p className="text-brand-muted leading-relaxed">
                 Co-founder of Deutsche Telekom&apos;s AI community, helping grow and shape a network of more than 5,000 AI practitioners and enthusiasts.
               </p>
             </div>
-            <div className="rounded-[18px] border border-brand-line bg-brand-charcoal/[0.02] p-6">
+            <div className="site-card-subtle p-6">
               <p className="text-[11px] uppercase tracking-[0.15em] text-brand-muted font-semibold mb-2">Main audiences</p>
               <p className="text-brand-muted leading-relaxed">
                 Hiring teams, leadership teams, public-sector organizations, event organizers, and groups seeking clear, responsible, human-centered AI guidance.

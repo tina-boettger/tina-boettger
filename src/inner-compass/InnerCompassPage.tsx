@@ -68,7 +68,7 @@ export default function InnerCompassPage() {
         <div className="min-h-screen bg-background text-foreground relative overflow-x-hidden">
           <button
             onClick={navigateHome}
-            className="fixed top-4 right-4 z-50 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-card px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] shadow-[var(--shadow-soft)] hover:border-primary hover:text-primary"
+            className="site-back-link fixed top-4 right-4 z-50 shadow-[var(--shadow-soft)]"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to site
@@ -81,7 +81,7 @@ export default function InnerCompassPage() {
           <div className="relative z-10">
             <ReflectionFlow />
           </div>
-          <footer className="relative z-10 px-6 pb-8">
+          <footer className="site-container relative z-10 pb-8">
             <LegalLinks />
           </footer>
         </div>

@@ -51,6 +51,9 @@ If your host presents a certificate Windows cannot validate, first check whether
 Use this dry-run command first if you want to verify the flow without making remote changes:
 `powershell -ExecutionPolicy Bypass -File .\scripts\deploy-ftp.ps1 -SkipBuild -WhatIf`
 
+If a deploy was interrupted after archiving, use upload-only recovery to put the current `dist` files back into the live folder without archiving the partial state again:
+`powershell -ExecutionPolicy Bypass -File .\scripts\deploy-ftp.ps1 -UploadOnly`
+
 ## GitHub Build Artifact
 
 The repo now includes a GitHub Actions workflow at [.github/workflows/build-release-package.yml](.github/workflows/build-release-package.yml).

@@ -103,7 +103,7 @@ function BlogShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-brand-paper text-brand-charcoal selection:bg-brand-green selection:text-white">
       <header className="border-b border-brand-line bg-brand-paper/95">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-6 py-8 md:px-12">
+        <div className="site-container site-header-row">
           <a href={appHref("/")} onClick={goHome} className="font-serif text-2xl font-bold tracking-tighter">
             Tina Böttger.
           </a>
@@ -128,8 +128,8 @@ function BlogShell({ children }: { children: ReactNode }) {
         </div>
       </header>
       {children}
-      <footer className="border-t border-brand-line px-6 py-10 md:px-12">
-        <div className="mx-auto max-w-7xl">
+      <footer className="border-t border-brand-line py-10">
+        <div className="site-container">
           <LegalLinks language="en" />
         </div>
       </footer>
@@ -146,7 +146,7 @@ export function PublicationCard({ article = BLOG_ARTICLE, compact = false }: { a
   };
 
   return (
-    <article className={`group overflow-hidden border border-brand-line bg-white transition-colors hover:border-brand-green/30 ${compact ? "max-w-md" : ""}`}>
+    <article className={`site-card group overflow-hidden transition-colors hover:border-brand-green/30 ${compact ? "max-w-md" : ""}`}>
       <a href={appHref(article.path)} onClick={openArticle} className="block">
         <div className="aspect-[16/9] overflow-hidden bg-brand-charcoal/[0.03]">
           <img
@@ -179,13 +179,13 @@ export function BlogIndexPage() {
 
   return (
     <BlogShell>
-      <main className="mx-auto max-w-7xl px-6 py-20 md:px-12 md:py-28">
+      <main className="site-container py-20 md:py-28">
         <div className="mb-16 flex items-center gap-4">
           <span className="h-px w-10 bg-brand-charcoal" />
           <p className="text-[12px] font-bold uppercase tracking-[0.18em]">Writing & Insights</p>
         </div>
         <h1 className="mb-20 font-serif text-6xl leading-none tracking-[-0.04em] md:text-8xl">The Blog.</h1>
-        <div className="grid gap-8 md:grid-cols-2">
+        <div className="article-card-grid">
           {BLOG_ARTICLES.map((article) => (
             <div key={article.path}>
               <PublicationCard article={article} compact />
@@ -199,48 +199,68 @@ export function BlogIndexPage() {
 
 function ArticleSection({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="border-t border-brand-line py-10">
-      <h2 className="mb-6 font-serif text-3xl leading-tight md:text-4xl">{title}</h2>
-      <div className="space-y-6 text-lg leading-relaxed text-brand-muted">{children}</div>
+    <section className="article-section">
+      <h2>{title}</h2>
+      <div className="article-copy">{children}</div>
     </section>
+  );
+}
+
+function ArticleHeroImage({ src, alt }: { src: string; alt: string }) {
+  return (
+    <div className="article-hero-frame">
+      <img
+        src={appAssetUrl(src)}
+        alt={alt}
+        loading="eager"
+      />
+    </div>
+  );
+}
+
+function BlogTable({
+  headers,
+  rows,
+}: {
+  headers: string[];
+  rows: Array<Array<ReactNode>>;
+}) {
+  return (
+    <div className="blog-table-shell">
+      <p className="blog-table-hint">Scroll sideways</p>
+      <div className="blog-table-scroll">
+        <table className="blog-table">
+          <thead>
+            <tr>
+              {headers.map((header) => (
+                <th key={header}>{header}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                {row.map((cell, cellIndex) =>
+                  cellIndex === 0 ? <th key={cellIndex} scope="row">{cell}</th> : <td key={cellIndex}>{cell}</td>,
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 
 function ArticleTable({ rows }: { rows: Array<[string, string, string]> }) {
   return (
-    <div className="my-8 overflow-hidden border border-brand-line bg-white text-sm md:text-base">
-      <div className="grid grid-cols-3 border-b border-brand-line bg-brand-paper text-[11px] font-bold uppercase tracking-[0.12em] text-brand-charcoal">
-        <div className="p-4">Concept</div>
-        <div className="p-4">Plain meaning</div>
-        <div className="p-4">Why it matters for AI</div>
-      </div>
-      {rows.map(([concept, meaning, relevance]) => (
-        <div key={concept} className="grid grid-cols-1 border-b border-brand-line last:border-b-0 md:grid-cols-3">
-          <div className="p-4 font-bold text-brand-charcoal">{concept}</div>
-          <div className="p-4 text-brand-muted">{meaning}</div>
-          <div className="p-4 text-brand-muted">{relevance}</div>
-        </div>
-      ))}
-    </div>
+    <BlogTable headers={["Concept", "Plain meaning", "Why it matters for AI"]} rows={rows} />
   );
 }
 
 function DomainTable({ rows }: { rows: Array<[string, string, string]> }) {
   return (
-    <div className="my-8 overflow-hidden border border-brand-line bg-white text-sm md:text-base">
-      <div className="grid grid-cols-3 border-b border-brand-line bg-brand-paper text-[11px] font-bold uppercase tracking-[0.12em] text-brand-charcoal">
-        <div className="p-4">Domain</div>
-        <div className="p-4">Central question</div>
-        <div className="p-4">Current tension</div>
-      </div>
-      {rows.map(([domain, question, tension]) => (
-        <div key={domain} className="grid grid-cols-1 border-b border-brand-line last:border-b-0 md:grid-cols-3">
-          <div className="p-4 font-bold text-brand-charcoal">{domain}</div>
-          <div className="p-4 text-brand-muted">{question}</div>
-          <div className="p-4 text-brand-muted">{tension}</div>
-        </div>
-      ))}
-    </div>
+    <BlogTable headers={["Domain", "Central question", "Current tension"]} rows={rows} />
   );
 }
 
@@ -273,32 +293,28 @@ export function BlogArticlePage() {
 
   return (
     <BlogShell>
-      <main className="mx-auto max-w-5xl px-6 py-16 md:px-12 md:py-24">
+      <main className="site-container site-article-shell">
         <a
           href={appHref("/blog")}
           onClick={(e) => {
             e.preventDefault();
             navigateToAppPath("/blog");
           }}
-          className="mb-10 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-brand-muted hover:text-brand-green"
+          className="site-back-link mb-10"
         >
           <ArrowLeft className="h-4 w-4" /> Back to blog
         </a>
-        <p className="mb-6 text-[11px] font-bold uppercase tracking-[0.15em] text-brand-muted">{BLOG_ARTICLE.date}</p>
-        <h1 className="mb-8 max-w-4xl font-serif text-5xl leading-[0.98] tracking-[-0.04em] md:text-7xl">
+        <p className="article-kicker">{BLOG_ARTICLE.date}</p>
+        <h1 className="article-title">
           {BLOG_ARTICLE.title}
         </h1>
-        <p className="mb-12 max-w-3xl text-xl leading-relaxed text-brand-muted">{BLOG_ARTICLE.subtitle}</p>
-        <div className="mb-14 overflow-hidden rounded-[4px] border border-brand-line">
-          <img
-            src={appAssetUrl(BLOG_ARTICLE.image)}
-            alt="A humanoid robot looking at its own reflection while applying lipstick"
-            className="h-[360px] w-full object-cover object-center md:h-[520px]"
-            loading="eager"
-          />
-        </div>
+        <p className="article-subtitle">{BLOG_ARTICLE.subtitle}</p>
+        <ArticleHeroImage
+          src={BLOG_ARTICLE.image}
+          alt="A humanoid robot looking at its own reflection while applying lipstick"
+        />
 
-        <article className="max-w-4xl">
+        <article className="site-editorial-body">
           <ArticleSection title="Executive thesis">
             <p>
               There is no good scientific basis for claiming that today&apos;s frontier AI systems are conscious. At the same time, there is no settled scientific theory that lets us rule out future machine consciousness in principle. A serious human-first approach therefore has to hold two thoughts at once: current systems should not be treated as conscious merely because they sound fluent, warm, or self-aware; but future systems may become complex enough that society needs better tools for evaluating uncertainty.<SourceRef id="1" /><SourceRef id="2" />
@@ -533,34 +549,30 @@ export function ErasureArticlePage() {
 
   return (
     <BlogShell>
-      <main className="mx-auto max-w-5xl px-6 py-16 md:px-12 md:py-24">
+      <main className="site-container site-article-shell">
         <a
           href={appHref("/blog")}
           onClick={(e) => {
             e.preventDefault();
             navigateToAppPath("/blog");
           }}
-          className="mb-10 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.14em] text-brand-muted hover:text-brand-green"
+          className="site-back-link mb-10"
         >
           <ArrowLeft className="h-4 w-4" /> Back to blog
         </a>
-        <p className="mb-6 text-[11px] font-bold uppercase tracking-[0.15em] text-brand-muted">{ERASURE_ARTICLE.date}</p>
-        <h1 className="mb-8 max-w-4xl font-serif text-5xl leading-[0.98] tracking-[-0.04em] md:text-7xl">
+        <p className="article-kicker">{ERASURE_ARTICLE.date}</p>
+        <h1 className="article-title">
           {ERASURE_ARTICLE.title}
         </h1>
-        <p className="mb-12 max-w-3xl text-xl leading-relaxed text-brand-muted">
+        <p className="article-subtitle">
           Much of the debate about AI focuses on what these systems might become. This post is about what they already inherit: human knowledge after the web has filtered, weighted, and forgotten it.
         </p>
-        <div className="mb-14 overflow-hidden rounded-[4px] border border-brand-line">
-          <img
-            src={appAssetUrl(ERASURE_ARTICLE.image)}
-            alt="A glass robotic hand erasing text from an old book in an archive"
-            className="h-[360px] w-full object-cover object-center md:h-[520px]"
-            loading="eager"
-          />
-        </div>
+        <ArticleHeroImage
+          src={ERASURE_ARTICLE.image}
+          alt="A glass robotic hand erasing text from an old book in an archive"
+        />
 
-        <article className="max-w-4xl">
+        <article className="site-editorial-body">
           <section className="pb-10">
             <p className="text-xl italic leading-relaxed text-brand-muted">
               Much of the debate about AI focuses on what these systems might become: conscious, autonomous, dangerous, transformative. Less attention goes to what they already are: systems built on human knowledge, shaped by human infrastructure, and inheriting human decisions about what is worth knowing. This post is about that inheritance, specifically, about what gets lost before the training even begins.
@@ -589,23 +601,16 @@ export function ErasureArticlePage() {
             <p>
               The training data for a large language model is not a photograph of one era. It is a weighted accumulation, an archaeological cross-section of the web&apos;s history. Research on dated data shows that effective knowledge cutoffs can diverge from reported ones because Common Crawl contains substantial older material and because curation introduces temporal distortions.<SourceRef id="8" /> What determines which era shapes a model&apos;s understanding is not only recency. It is authority, repetition, and discoverability.
             </p>
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse text-left text-sm text-brand-muted">
-                <thead>
-                  <tr className="border-b border-brand-line text-brand-charcoal">
-                    <th className="py-3 pr-6 font-bold">What gets lost before AI training begins</th>
-                    <th className="py-3 font-bold">How it disappears</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="border-b border-brand-line"><td className="py-3 pr-6 font-bold text-brand-charcoal">Removed from platforms</td><td className="py-3">Deleted edits, unresolved controversies, and uncomfortable context leave the visible web, though archives may preserve traces.</td></tr>
-                  <tr className="border-b border-brand-line"><td className="py-3 pr-6 font-bold text-brand-charcoal">Underweighted by infrastructure</td><td className="py-3">Blogs, marginal scholarship, and non-institutional knowledge may exist but remain less linked-to and less deeply crawled.</td></tr>
-                  <tr className="border-b border-brand-line"><td className="py-3 pr-6 font-bold text-brand-charcoal">Overweighted by repetition</td><td className="py-3">Official histories, SEO pages, and institutional narratives repeat thousands of times across the web.</td></tr>
-                  <tr className="border-b border-brand-line"><td className="py-3 pr-6 font-bold text-brand-charcoal">Flattened by pretraining</td><td className="py-3">Minority questions statistically dissolve into dominant patterns: not suppressed, but averaged away.</td></tr>
-                  <tr><td className="py-3 pr-6 font-bold text-brand-charcoal">Reproduced by AI</td><td className="py-3">Smooth answers inherit old silences as if they were settled truth.</td></tr>
-                </tbody>
-              </table>
-            </div>
+            <BlogTable
+              headers={["What gets lost before AI training begins", "How it disappears"]}
+              rows={[
+                ["Removed from platforms", "Deleted edits, unresolved controversies, and uncomfortable context leave the visible web, though archives may preserve traces."],
+                ["Underweighted by infrastructure", "Blogs, marginal scholarship, and non-institutional knowledge may exist but remain less linked-to and less deeply crawled."],
+                ["Overweighted by repetition", "Official histories, SEO pages, and institutional narratives repeat thousands of times across the web."],
+                ["Flattened by pretraining", "Minority questions statistically dissolve into dominant patterns: not suppressed, but averaged away."],
+                ["Reproduced by AI", "Smooth answers inherit old silences as if they were settled truth."],
+              ]}
+            />
           </ArticleSection>
 
           <ArticleSection title="System Zero: The Warning That Arrived Early">

@@ -7,6 +7,7 @@ param(
   [string]$AcceptInvalidCert = $env:FTP_ACCEPT_INVALID_CERT,
   [string]$BuildDir = "dist",
   [switch]$SkipBuild,
+  [switch]$UploadOnly,
   [switch]$WhatIf
 )
 
@@ -32,7 +33,7 @@ function Normalize-RemoteDir {
     return "/"
   }
 
-  $trimmed = $Value.Trim()
+  $trimmed = $Value.Trim() -replace "\\", "/"
   if ([string]::IsNullOrWhiteSpace($trimmed)) {
     return "/"
   }
@@ -78,12 +79,24 @@ function Join-RemotePath {
   )
 
   $normalizedBase = Normalize-RemoteDir $Base
-  $normalizedChild = $Child.TrimStart("/")
+  $normalizedChild = ($Child -replace "\\", "/").TrimStart("/")
   if ([string]::IsNullOrWhiteSpace($normalizedChild)) {
     return $normalizedBase.TrimEnd("/")
   }
 
   return ($normalizedBase.TrimEnd("/") + "/" + $normalizedChild)
+}
+
+function Get-RemoteParentPath {
+  param([string]$Path)
+
+  $normalizedPath = ($Path -replace "\\", "/").TrimEnd("/")
+  $lastSlash = $normalizedPath.LastIndexOf("/")
+  if ($lastSlash -le 0) {
+    return "/"
+  }
+
+  return $normalizedPath.Substring(0, $lastSlash)
 }
 
 function ConvertTo-FtpUriPath {
@@ -93,6 +106,7 @@ function ConvertTo-FtpUriPath {
     return "/"
   }
 
+  $Path = $Path -replace "\\", "/"
   $hasTrailingSlash = $Path.EndsWith("/")
   $segments = $Path.Trim("/") -split "/" | Where-Object { $_ -ne "" }
   $encoded = ($segments | ForEach-Object { [System.Uri]::EscapeDataString($_) }) -join "/"
@@ -280,6 +294,12 @@ function Move-RemoteItem {
   }
 }
 
+function Test-MissingRemoteItemError {
+  param([string]$Message)
+
+  return $Message -match "550" -and $Message -match "No such file|not found|not available|nicht gefunden|Datei nicht"
+}
+
 function Upload-File {
   param(
     [string]$LocalPath,
@@ -292,7 +312,12 @@ function Upload-File {
   }
 
   $bytes = [System.IO.File]::ReadAllBytes($LocalPath)
-  Invoke-Ftp -Path $RemotePath -Method ([System.Net.WebRequestMethods+Ftp]::UploadFile) -Body $bytes | Out-Null
+  try {
+    Invoke-Ftp -Path $RemotePath -Method ([System.Net.WebRequestMethods+Ftp]::UploadFile) -Body $bytes | Out-Null
+  }
+  catch {
+    throw "Upload failed for '$LocalPath' -> '$RemotePath'. $($_.Exception.Message)"
+  }
 }
 
 Ensure-Value -Value $HostName -Name "FTP_HOST"
@@ -338,17 +363,32 @@ try {
   $archiveRoot = Join-RemotePath -Base $RemoteDir -Child "_archives"
   $archiveDir = Join-RemotePath -Base $archiveRoot -Child $timestamp
 
-  Write-Host "Preparing remote archive folder $archiveDir"
-  if (-not $WhatIf) {
-    Ensure-RemoteDirectory -Path $archiveDir
+  if ($UploadOnly) {
+    Write-Warning "UploadOnly is enabled. Existing remote files will not be archived before upload."
   }
+  else {
+    Write-Host "Preparing remote archive folder $archiveDir"
+    if (-not $WhatIf) {
+      Ensure-RemoteDirectory -Path $archiveDir
+    }
 
-  $rootItems = Get-FtpListing -Path $RemoteDir
-  $itemsToArchive = $rootItems | Where-Object { $_.Name -notin @("_archives", ".", "..") }
-  foreach ($item in $itemsToArchive) {
-    $source = Join-RemotePath -Base $RemoteDir -Child $item.Name
-    $destination = Join-RemotePath -Base $archiveDir -Child $item.Name
-    Move-RemoteItem -SourcePath $source -DestinationPath $destination
+    $rootItems = Get-FtpListing -Path $RemoteDir
+    $itemsToArchive = $rootItems | Where-Object { $_.Name -notin @("_archives", ".", "..") }
+    foreach ($item in $itemsToArchive) {
+      $source = Join-RemotePath -Base $RemoteDir -Child $item.Name
+      $destination = Join-RemotePath -Base $archiveDir -Child $item.Name
+      try {
+        Move-RemoteItem -SourcePath $source -DestinationPath $destination
+      }
+      catch {
+        if (Test-MissingRemoteItemError -Message $_.Exception.Message) {
+          Write-Warning "Skipping '$source' because the FTP server listed it but then reported it missing."
+          continue
+        }
+
+        throw
+      }
+    }
   }
 
   Write-Host "Uploading build output from $resolvedBuildDir"
@@ -371,7 +411,7 @@ try {
         $relative = $_.FullName.Substring($resolvedBuildDir.Length).TrimStart("\")
         $relativeRemote = ($relative -replace "\\", "/")
         $destination = Join-RemotePath -Base $RemoteDir -Child $relativeRemote
-        $destinationDir = Split-Path $destination -Parent
+        $destinationDir = Get-RemoteParentPath -Path $destination
         if (-not $WhatIf) {
           Ensure-RemoteDirectory -Path $destinationDir
         }
@@ -388,7 +428,12 @@ try {
     Upload-File -LocalPath $indexFile.FullName -RemotePath $remoteIndex
   }
 
-  Write-Host "FTP deployment completed. Archived previous live files to $archiveDir"
+  if ($UploadOnly) {
+    Write-Host "FTP upload completed. Existing remote files were not archived."
+  }
+  else {
+    Write-Host "FTP deployment completed. Archived previous live files to $archiveDir"
+  }
 }
 finally {
   if ($null -ne $script:PreviousCertificateValidationCallback) {

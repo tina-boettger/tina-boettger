@@ -5,6 +5,7 @@ out/
 
 .env
 .env.*
+.env.deploy.ps1
 *.pem
 *.key
 id_rsa
@@ -30,3 +31,4 @@ website-build.zip
 
 # Local preview helpers
 .preview-server.cjs
+.vite-dev*.log

@@ -481,7 +481,7 @@ function HomePage() {
           scrolled ? "bg-brand-paper py-3 md:py-4 border-b border-brand-line" : "bg-transparent py-4 md:py-8 border-b border-transparent"
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 md:px-12 flex justify-between items-center gap-4 py-4 min-h-[64px]">
+        <div className="site-container flex justify-between items-center gap-4 py-4 min-h-[64px]">
           <a href="#" onClick={(e) => scrollToSection(e, "#")} className="font-serif text-2xl tracking-tighter font-bold whitespace-nowrap leading-none shrink-0">
             Tina Böttger.
           </a>
@@ -573,27 +573,27 @@ function HomePage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-[#F6F4F0]">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 relative flex flex-col justify-start md:justify-center min-h-[90svh] md:min-h-screen lg:min-h-[800px] pt-28 pb-12 md:pt-56 lg:pt-32 lg:pb-0">
-          <div className="grid lg:grid-cols-12 w-full items-center gap-12 relative z-10 pt-6 lg:pt-0 pb-6 lg:pb-0">
+        <div className="site-container relative flex flex-col justify-start md:justify-center min-h-[100svh] md:min-h-screen lg:min-h-[800px] pt-24 pb-[calc(4rem+env(safe-area-inset-bottom))] md:pt-56 lg:pt-32 lg:pb-0">
+          <div className="grid lg:grid-cols-12 w-full items-center gap-10 lg:gap-12 relative z-10 pt-[48svh] sm:pt-[50svh] lg:pt-0 pb-6 lg:pb-0">
             <motion.div 
               className="lg:col-span-6 lg:pr-12 relative z-20"
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, ease: "easeOut" }}
             >
-              <div className="flex items-center gap-4 mb-4 lg:mb-8 mt-4 lg:mt-0">
+              <div className="flex items-center gap-4 mb-4 lg:mb-8 mt-0">
                 <div className="w-8 lg:w-12 h-[1px] bg-brand-charcoal"></div>
                 <p className="text-[10px] lg:text-[12px] font-bold uppercase tracking-[0.2em] text-brand-charcoal">
                   AI Leader. Speaker. Community Builder.
                 </p>
               </div>
 
-              <h1 className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-[90px] xl:text-[110px] font-serif leading-[1.05] lg:leading-[0.9] tracking-[-0.04em] mb-6 lg:mb-10 text-brand-charcoal whitespace-nowrap">
+              <h1 className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl lg:text-[90px] xl:text-[110px] font-serif leading-[1.05] lg:leading-[0.9] tracking-[-0.04em] mb-6 lg:mb-10 text-brand-charcoal whitespace-normal sm:whitespace-nowrap">
                 <span className="block">Humanizing the</span>
                 <span className="block">AI Revolution.</span>
               </h1>
               
-              <p className="text-base lg:text-xl text-brand-charcoal font-medium leading-relaxed mb-10 lg:mb-12 max-w-lg bg-[#F6F4F0]/50 lg:bg-transparent p-4 lg:p-0 rounded-lg backdrop-blur-sm lg:backdrop-blur-0">
+              <p className="text-base lg:text-xl text-brand-charcoal font-medium leading-relaxed mb-8 lg:mb-12 max-w-lg bg-[#F6F4F0]/80 lg:bg-transparent p-3 lg:p-0 rounded-[4px] backdrop-blur-sm lg:backdrop-blur-0">
                 {t.hero.intro}
               </p>
               <p className="sr-only">
@@ -623,7 +623,7 @@ function HomePage() {
 
           {/* Large Profile Image background-integrated */}
           <motion.div 
-            className="absolute right-0 bottom-0 top-0 w-full lg:w-[60%] flex items-end justify-end pointer-events-none"
+            className="absolute right-0 top-20 h-[52svh] w-full lg:bottom-0 lg:top-0 lg:h-auto lg:w-[60%] flex items-start lg:items-end justify-end pointer-events-none"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.5 }}
@@ -632,11 +632,14 @@ function HomePage() {
               <img
                 src={appAssetUrl("/New%20Picture.webp")}
                 alt="Tina Böttger"
-                className="w-full h-full object-cover object-[70%_top] sm:object-center lg:object-right-bottom opacity-80 lg:opacity-100"
+                className="w-full h-full object-cover object-[58%_top] sm:object-center lg:object-right-bottom opacity-90 lg:opacity-100"
                 referrerPolicy="no-referrer"
                 loading="eager"
               />
-              
+              <p className="absolute bottom-3 right-4 z-10 text-[9px] font-semibold uppercase tracking-[0.14em] text-brand-charcoal/45">
+                Photo &copy; G&uuml;nther Naderer
+              </p>
+
               {/* Fade for mobile text readability */}
               <div className="absolute inset-0 bg-gradient-to-t from-[#F6F4F0] via-transparent to-transparent lg:hidden"></div>
               <div className="absolute inset-0 bg-gradient-to-r from-[#F6F4F0] via-[#F6F4F0]/20 to-transparent lg:hidden"></div>
@@ -646,8 +649,8 @@ function HomePage() {
       </section>
 
       {/* Moments of Impact Carousel */}
-      <section id="references" className="py-16 md:py-24 border-y border-brand-line bg-brand-paper overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
+      <section id="references" className="site-section border-y border-brand-line bg-brand-paper overflow-hidden">
+        <div className="site-container">
           <div className="flex flex-col md:flex-row justify-between items-end mb-8 md:mb-12 gap-8">
             <div>
               <p className="text-[11px] uppercase tracking-[0.15em] text-brand-muted font-bold mb-4">
@@ -696,13 +699,14 @@ function HomePage() {
                     <img
                       src={appAssetUrl(moment.image)}
                       alt={moment.title}
-                      className="w-full h-full object-cover object-top grayscale brightness-90 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-700"
+                      className="moment-image w-full h-full object-cover object-top transition-all duration-700"
                       referrerPolicy="no-referrer"
                       loading="eager"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-brand-charcoal/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                   </div>
                   <p className="text-sm font-bold uppercase tracking-widest text-brand-charcoal">{moment.title}</p>
+                  <p className="site-credit">Photo &copy; G&uuml;nther Naderer</p>
                 </div>
               ))}
             </motion.div>
@@ -711,8 +715,8 @@ function HomePage() {
       </section>
 
       {/* Speaking Topics */}
-      <section id="topics" className="py-14 md:py-20 bg-brand-paper border-b border-brand-line">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 grid md:grid-cols-2 gap-8 md:gap-14 items-start">
+      <section id="topics" className="site-section-tight bg-brand-paper border-b border-brand-line">
+        <div className="site-container grid md:grid-cols-2 gap-8 md:gap-14 items-start">
           <div className="flex flex-col justify-start">
             <span className="text-brand-green text-[12px] font-bold tracking-[0.1em] uppercase mb-4 block">{t.topics.tag}</span>
             <h2 className="text-4xl md:text-5xl font-serif leading-[1.1] mb-6 md:mb-8">{t.topics.headline}</h2>
@@ -755,8 +759,8 @@ function HomePage() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-14 md:py-20 bg-brand-paper">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
+      <section id="about" className="site-section-tight bg-brand-paper">
+        <div className="site-container">
           <div className="grid md:grid-cols-12 gap-10 md:gap-16 items-stretch">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
@@ -825,8 +829,8 @@ function HomePage() {
       </section>
 
       {/* Blog Section */}
-      <section id="publications" className="py-16 md:py-28 border-t border-brand-line bg-brand-paper">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
+      <section id="publications" className="site-section border-t border-brand-line bg-brand-paper">
+        <div className="site-container">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-12 md:mb-16">
             <div>
               <span className="text-brand-green text-[12px] font-bold tracking-[0.1em] uppercase mb-4 block">{t.blog.tag}</span>
@@ -843,9 +847,9 @@ function HomePage() {
               {t.blog.readAll} <ChevronRight className="w-4 h-4" />
             </a>
           </div>
-          <div className="grid max-w-5xl gap-8 md:grid-cols-2">
+          <div className="site-scroll-rail">
             {BLOG_ARTICLES.map((article) => (
-              <div key={article.path}>
+              <div key={article.path} className="site-scroll-item">
                 <PublicationCard article={article} compact />
               </div>
             ))}
@@ -857,8 +861,8 @@ function HomePage() {
       </section>
 
       {/* Resources Section */}
-      <section id="resources" className="py-14 md:py-20 border-t border-brand-line bg-brand-paper">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 grid md:grid-cols-2 gap-10 md:gap-16 items-start">
+      <section id="resources" className="site-section-tight border-t border-brand-line bg-brand-paper">
+        <div className="site-container grid md:grid-cols-2 gap-10 md:gap-16 items-start">
           <div className="flex flex-col justify-start">
             <span className="text-brand-green text-[12px] font-bold tracking-[0.1em] uppercase mb-4 block">{t.resources.tag}</span>
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif leading-[1.1] mb-6 md:mb-8">{t.resources.headline}</h2>
@@ -867,7 +871,7 @@ function HomePage() {
             </p>
           </div>
           <div className="space-y-6 md:space-y-8 flex flex-col justify-start">
-            <div className="bg-white border border-brand-line p-8 md:p-12 hover:border-brand-green/20 transition-colors relative overflow-hidden group">
+            <div className="site-card p-8 md:p-12 hover:border-brand-green/20 transition-colors relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-50"><Library className="w-8 h-8 text-brand-green" /></div>
               <h3 className="text-2xl font-serif mb-4 flex items-center gap-3">{t.resources.compass_title}</h3>
               <p className="text-brand-muted mb-8 text-sm md:text-base leading-relaxed">
@@ -885,7 +889,7 @@ function HomePage() {
               </a>
             </div>
             
-            <div className="bg-brand-charcoal/[0.02] border border-brand-line p-8 md:p-12 hover:border-brand-green/20 transition-colors relative overflow-hidden group">
+            <div className="site-card-subtle p-8 md:p-12 hover:border-brand-green/20 transition-colors relative overflow-hidden group">
               <h3 className="text-2xl font-serif mb-4 flex items-center gap-3">{t.resources.presentations_title}</h3>
               <p className="text-brand-muted mb-8 text-sm md:text-base leading-relaxed">
                 {t.resources.presentations_desc}
@@ -944,8 +948,8 @@ function HomePage() {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-16 md:py-32 border-t border-brand-line bg-brand-charcoal/[0.02]">
-        <div className="max-w-7xl mx-auto px-6 md:px-12">
+      <section id="contact" className="site-section border-t border-brand-line bg-brand-charcoal/[0.02]">
+        <div className="site-container">
           <div className="grid md:grid-cols-2 gap-12 md:gap-20">
             <div className="text-center md:text-left">
               <span className="text-brand-green text-[12px] font-bold tracking-widest uppercase mb-4 md:mb-6 block">{t.contact.tag}</span>
@@ -1010,7 +1014,7 @@ function HomePage() {
 
       {/* Footer */}
       <footer className="py-8 md:py-12 border-t border-brand-line bg-brand-paper">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row justify-between items-center gap-8">
+        <div className="site-container flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex gap-10 text-center md:text-left">
             <span className="text-[10px] font-bold uppercase tracking-[0.05em] text-brand-muted">{t.footer.tag}</span>
           </div>
@@ -1079,17 +1083,17 @@ function LegalPage({ type, language }: { type: "impressum" | "privacy"; language
   };
 
   return (
-    <div className="min-h-screen bg-brand-paper text-brand-charcoal px-6 py-20 md:px-12">
+    <div className="site-page">
       <a
         href={appHref("/")}
         onClick={goHome}
-        className="fixed top-4 right-4 z-50 inline-flex items-center gap-2 rounded-full border border-brand-line bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] hover:border-brand-green hover:text-brand-green"
+        className="site-back-link fixed top-4 right-4 z-50"
       >
         <ArrowLeft className="w-4 h-4" />
         Back to site
       </a>
 
-      <main className="mx-auto max-w-4xl">
+      <main className="site-container site-page-shell">
         <p className="mb-5 text-[11px] font-bold uppercase tracking-[0.18em] text-brand-green">
           {legalTitle}
         </p>
