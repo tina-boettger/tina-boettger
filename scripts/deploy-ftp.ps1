@@ -351,7 +351,11 @@ function Move-LiveItemsToArchive {
   }
 
   $protectedNames = Get-ProtectedLiveNames
-  $itemsToArchive = Get-FtpListing -Path $RemoteDir | Where-Object { $_.Name -notin $protectedNames }
+  # Some FTP servers include descendant or slash-prefixed legacy entries in a root listing.
+  # Archive only immediate live children; descendants move with their parent directory.
+  $itemsToArchive = Get-FtpListing -Path $RemoteDir |
+    Where-Object { $_.Name -notin $protectedNames -and $_.Name -notmatch "[/\\]" } |
+    Sort-Object -Property Name -Unique
   foreach ($item in $itemsToArchive) {
     $source = Join-RemotePath -Base $RemoteDir -Child $item.Name
     $destination = Join-RemotePath -Base $ArchiveDir -Child $item.Name
