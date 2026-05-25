@@ -1,14 +1,12 @@
 param(
-  [string]$HostName = $env:FTP_HOST,
-  [string]$Username = $env:FTP_USERNAME,
-  [string]$Password = $env:FTP_PASSWORD,
-  [string]$RemoteDir = $env:FTP_REMOTE_DIR,
-  [string]$UseSsl = $env:FTP_USE_SSL,
-  [string]$AcceptInvalidCert = $env:FTP_ACCEPT_INVALID_CERT,
+  [string]$SettingsPath = (Join-Path $PSScriptRoot "deploy-settings.local.psd1"),
   [string]$BuildDir = "dist",
   [switch]$SkipBuild,
   [switch]$UploadOnly,
-  [switch]$WhatIf
+  [switch]$WhatIf,
+  [switch]$UploadOriginalMedia,
+  [string]$OriginalMediaManifest = (Join-Path $PSScriptRoot "original-media-manifest.txt"),
+  [string]$RollbackArchive
 )
 
 $ErrorActionPreference = "Stop"
@@ -52,7 +50,8 @@ function Normalize-RemoteDir {
 function ConvertTo-Bool {
   param(
     [string]$Value,
-    [bool]$Default
+    [bool]$Default,
+    [string]$Name = "boolean setting"
   )
 
   if ([string]::IsNullOrWhiteSpace($Value)) {
@@ -68,7 +67,7 @@ function ConvertTo-Bool {
     "false" { return $false }
     "no" { return $false }
     "off" { return $false }
-    default { throw "Invalid FTP_USE_SSL value '$Value'. Use true or false." }
+    default { throw "Invalid $Name value '$Value'. Use true or false." }
   }
 }
 
@@ -149,14 +148,16 @@ function ConvertFrom-FtpListingLine {
     return [pscustomobject]@{
       Name = $windowsMatch.Groups["name"].Value
       IsDirectory = $windowsMatch.Groups["marker"].Value.ToUpperInvariant() -eq "<DIR>"
+      Size = if ($windowsMatch.Groups["marker"].Value -match "^\d+$") { [long]$windowsMatch.Groups["marker"].Value } else { $null }
     }
   }
 
-  $unixMatch = [regex]::Match($trimmed, "^(?<type>[dl-])[rwxstST-]{9}\s+\d+\s+\S+\s+\S+\s+\d+\s+\S+\s+\d+\s+(?:[\d:]{4,5}|\d{4})\s+(?<name>.+)$")
+  $unixMatch = [regex]::Match($trimmed, "^(?<type>[dl-])[rwxstST-]{9}\s+\d+\s+\S+\s+\S+\s+(?<size>\d+)\s+\S+\s+\d+\s+(?:[\d:]{4,5}|\d{4})\s+(?<name>.+)$")
   if ($unixMatch.Success) {
     return [pscustomobject]@{
       Name = $unixMatch.Groups["name"].Value
       IsDirectory = $unixMatch.Groups["type"].Value -eq "d"
+      Size = [long]$unixMatch.Groups["size"].Value
     }
   }
 
@@ -164,6 +165,7 @@ function ConvertFrom-FtpListingLine {
   return [pscustomobject]@{
     Name = $name
     IsDirectory = $false
+    Size = $null
   }
 }
 
@@ -320,79 +322,63 @@ function Upload-File {
   }
 }
 
-Ensure-Value -Value $HostName -Name "FTP_HOST"
-Ensure-Value -Value $Username -Name "FTP_USERNAME"
-Ensure-Value -Value $Password -Name "FTP_PASSWORD"
-$RemoteDir = Normalize-RemoteDir $RemoteDir
-$UseSsl = ConvertTo-Bool -Value $UseSsl -Default $true
-$AcceptInvalidCert = ConvertTo-Bool -Value $AcceptInvalidCert -Default $false
+function Get-ProtectedLiveNames {
+  $protectedNames = @("_archives")
+  if ($OriginalMediaDir -eq $RemoteDir) {
+    throw "OriginalMediaDir must not be the same as LiveDir."
+  }
 
-if ($UseSsl -and $AcceptInvalidCert) {
-  Write-Warning "FTP_ACCEPT_INVALID_CERT is true. TLS encryption remains enabled, but certificate trust/hostname validation is bypassed for this deploy."
-  $script:PreviousCertificateValidationCallback = [Net.ServicePointManager]::ServerCertificateValidationCallback
-  [Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
+  if ($OriginalMediaDir.StartsWith($RemoteDir, [StringComparison]::OrdinalIgnoreCase)) {
+    $relativePath = $OriginalMediaDir.Substring($RemoteDir.Length).Trim("/")
+    if ([string]::IsNullOrWhiteSpace($relativePath)) {
+      throw "OriginalMediaDir must not be the same as LiveDir."
+    }
+
+    $protectedNames += ($relativePath -split "/")[0]
+  }
+  elseif ($RemoteDir.StartsWith($OriginalMediaDir, [StringComparison]::OrdinalIgnoreCase)) {
+    throw "LiveDir must not be inside OriginalMediaDir."
+  }
+
+  return $protectedNames | Select-Object -Unique
 }
 
-$projectRoot = Split-Path -Parent $PSScriptRoot
+function Move-LiveItemsToArchive {
+  param([string]$ArchiveDir)
 
-try {
-  $resolvedBuildDir = Join-Path $projectRoot $BuildDir
-  if (-not (Test-Path $resolvedBuildDir)) {
-    throw "Build directory '$resolvedBuildDir' does not exist."
+  if (-not $WhatIf) {
+    Ensure-RemoteDirectory -Path $ArchiveDir
   }
 
-  if (-not $SkipBuild) {
-    Write-Host "Building project..."
-    Push-Location $projectRoot
+  $protectedNames = Get-ProtectedLiveNames
+  $itemsToArchive = Get-FtpListing -Path $RemoteDir | Where-Object { $_.Name -notin $protectedNames }
+  foreach ($item in $itemsToArchive) {
+    $source = Join-RemotePath -Base $RemoteDir -Child $item.Name
+    $destination = Join-RemotePath -Base $ArchiveDir -Child $item.Name
     try {
-      npm run build
-      if ($LASTEXITCODE -ne 0) {
-        throw "Build failed."
+      Move-RemoteItem -SourcePath $source -DestinationPath $destination
+    }
+    catch {
+      if (Test-MissingRemoteItemError -Message $_.Exception.Message) {
+        Write-Warning "Skipping '$source' because the FTP server listed it but then reported it missing."
+        continue
       }
-    }
-    finally {
-      Pop-Location
-    }
-  }
 
-  if (-not (Test-Path $resolvedBuildDir)) {
-    throw "Build directory '$resolvedBuildDir' does not exist after build."
-  }
-
-  $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-  $archiveRoot = Join-RemotePath -Base $RemoteDir -Child "_archives"
-  $archiveDir = Join-RemotePath -Base $archiveRoot -Child $timestamp
-
-  if ($UploadOnly) {
-    Write-Warning "UploadOnly is enabled. Existing remote files will not be archived before upload."
-  }
-  else {
-    Write-Host "Preparing remote archive folder $archiveDir"
-    if (-not $WhatIf) {
-      Ensure-RemoteDirectory -Path $archiveDir
-    }
-
-    $rootItems = Get-FtpListing -Path $RemoteDir
-    $itemsToArchive = $rootItems | Where-Object { $_.Name -notin @("_archives", ".", "..") }
-    foreach ($item in $itemsToArchive) {
-      $source = Join-RemotePath -Base $RemoteDir -Child $item.Name
-      $destination = Join-RemotePath -Base $archiveDir -Child $item.Name
-      try {
-        Move-RemoteItem -SourcePath $source -DestinationPath $destination
-      }
-      catch {
-        if (Test-MissingRemoteItemError -Message $_.Exception.Message) {
-          Write-Warning "Skipping '$source' because the FTP server listed it but then reported it missing."
-          continue
-        }
-
-        throw
-      }
+      throw
     }
   }
+}
 
-  Write-Host "Uploading build output from $resolvedBuildDir"
-  $localItems = Get-ChildItem -Path $resolvedBuildDir -Force
+function Upload-BuildOutput {
+  param([string]$ResolvedBuildDir)
+
+  Write-Host "Uploading build output from $ResolvedBuildDir"
+  $localItems = Get-ChildItem -Path $ResolvedBuildDir -Force
+  $protectedNames = Get-ProtectedLiveNames
+  $protectedBuildItems = $localItems | Where-Object { $_.Name -in $protectedNames }
+  if ($protectedBuildItems) {
+    throw "Build output contains a protected remote directory name and cannot be uploaded: $($protectedBuildItems.Name -join ', ')."
+  }
   $indexFile = $localItems | Where-Object { -not $_.PSIsContainer -and $_.Name -eq "index.html" }
   $orderedItems = @(
     $localItems | Where-Object { -not ($_.PSIsContainer -or $_.Name -eq "index.html") }
@@ -408,12 +394,10 @@ try {
       }
 
       Get-ChildItem -Path $item.FullName -Recurse -File | ForEach-Object {
-        $relative = $_.FullName.Substring($resolvedBuildDir.Length).TrimStart("\")
-        $relativeRemote = ($relative -replace "\\", "/")
-        $destination = Join-RemotePath -Base $RemoteDir -Child $relativeRemote
-        $destinationDir = Get-RemoteParentPath -Path $destination
+        $relative = $_.FullName.Substring($ResolvedBuildDir.Length).TrimStart("\")
+        $destination = Join-RemotePath -Base $RemoteDir -Child ($relative -replace "\\", "/")
         if (-not $WhatIf) {
-          Ensure-RemoteDirectory -Path $destinationDir
+          Ensure-RemoteDirectory -Path (Get-RemoteParentPath -Path $destination)
         }
         Upload-File -LocalPath $_.FullName -RemotePath $destination
       }
@@ -424,8 +408,167 @@ try {
   }
 
   if ($indexFile) {
-    $remoteIndex = Join-RemotePath -Base $RemoteDir -Child "index.html"
-    Upload-File -LocalPath $indexFile.FullName -RemotePath $remoteIndex
+    Upload-File -LocalPath $indexFile.FullName -RemotePath (Join-RemotePath -Base $RemoteDir -Child "index.html")
+  }
+}
+
+function Upload-OriginalMediaFiles {
+  param([string]$ManifestPath)
+
+  if (-not (Test-Path -LiteralPath $ManifestPath)) {
+    throw "Original media manifest '$ManifestPath' does not exist."
+  }
+
+  $files = Get-Content -LiteralPath $ManifestPath |
+    Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and -not $_.TrimStart().StartsWith("#") }
+  if (-not $files) {
+    throw "Original media manifest is empty."
+  }
+
+  if (-not $WhatIf) {
+    Ensure-RemoteDirectory -Path $OriginalMediaDir
+  }
+
+  foreach ($fileName in $files) {
+    $localPath = Join-Path (Join-Path $projectRoot "public") $fileName
+    if (-not (Test-Path -LiteralPath $localPath)) {
+      throw "Original media file '$localPath' does not exist."
+    }
+    Upload-File -LocalPath $localPath -RemotePath (Join-RemotePath -Base $OriginalMediaDir -Child $fileName)
+  }
+
+  if (-not $WhatIf) {
+    $remoteItems = Get-FtpListing -Path $OriginalMediaDir
+    foreach ($fileName in $files) {
+      $localFile = Get-Item -LiteralPath (Join-Path (Join-Path $projectRoot "public") $fileName)
+      $remoteFile = $remoteItems | Where-Object { $_.Name -eq $fileName } | Select-Object -First 1
+      if (-not $remoteFile) {
+        throw "Original media verification failed: '$fileName' was not found remotely."
+      }
+      if ($null -ne $remoteFile.Size -and $remoteFile.Size -ne $localFile.Length) {
+        throw "Original media verification failed: size differs for '$fileName'."
+      }
+    }
+  }
+
+  Write-Host "Original media upload verified for $($files.Count) files in $OriginalMediaDir."
+}
+
+if ($UploadOriginalMedia -and -not [string]::IsNullOrWhiteSpace($RollbackArchive)) {
+  throw "UploadOriginalMedia and RollbackArchive cannot be used together."
+}
+if ($UploadOriginalMedia -and $UploadOnly) {
+  throw "UploadOriginalMedia and UploadOnly cannot be used together."
+}
+
+if (-not (Test-Path -LiteralPath $SettingsPath)) {
+  throw "Missing deployment settings '$SettingsPath'. Copy deploy-settings.example.psd1 to deploy-settings.local.psd1 and confirm the protected FTP folder before publishing."
+}
+
+$settings = Import-PowerShellDataFile -LiteralPath $SettingsPath
+$HostName = [string]$settings.HostName
+$RemoteDirValue = [string]$settings.LiveDir
+$OriginalMediaDirValue = [string]$settings.OriginalMediaDir
+$UseSsl = [string]$settings.UseSsl
+$AcceptInvalidCert = [string]$settings.AcceptInvalidCertificate
+$vaultName = [string]$settings.VaultName
+$secretName = [string]$settings.SecretName
+
+Ensure-Value -Value $HostName -Name "HostName"
+Ensure-Value -Value $RemoteDirValue -Name "LiveDir"
+Ensure-Value -Value $OriginalMediaDirValue -Name "OriginalMediaDir"
+Ensure-Value -Value $vaultName -Name "VaultName"
+Ensure-Value -Value $secretName -Name "SecretName"
+$RemoteDir = Normalize-RemoteDir $RemoteDirValue
+$OriginalMediaDir = Normalize-RemoteDir $OriginalMediaDirValue
+$UseSsl = ConvertTo-Bool -Value $UseSsl -Default $true -Name "UseSsl"
+$AcceptInvalidCert = ConvertTo-Bool -Value $AcceptInvalidCert -Default $false -Name "AcceptInvalidCertificate"
+$null = Get-ProtectedLiveNames
+
+Import-Module Microsoft.PowerShell.SecretManagement -ErrorAction Stop
+$ftpCredential = Get-Secret -Name $secretName -Vault $vaultName -ErrorAction Stop
+if ($ftpCredential -isnot [System.Management.Automation.PSCredential]) {
+  throw "Secret '$secretName' in vault '$vaultName' must be stored as a PSCredential."
+}
+$script:Username = $ftpCredential.UserName
+$script:Password = $ftpCredential.GetNetworkCredential().Password
+
+if ($UseSsl -and $AcceptInvalidCert) {
+  Write-Warning "AcceptInvalidCertificate is true. TLS remains enabled, but certificate validation is bypassed for this deploy."
+  $script:PreviousCertificateValidationCallback = [Net.ServicePointManager]::ServerCertificateValidationCallback
+  [Net.ServicePointManager]::ServerCertificateValidationCallback = { $true }
+}
+
+$projectRoot = Split-Path -Parent $PSScriptRoot
+$timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+$archiveRoot = Join-RemotePath -Base $RemoteDir -Child "_archives"
+
+try {
+  Write-Host "Preflight: FTPS target $HostName, live directory $RemoteDir, protected originals directory $OriginalMediaDir"
+  $null = Get-FtpListing -Path $RemoteDir
+
+  if ($UploadOriginalMedia) {
+    Upload-OriginalMediaFiles -ManifestPath $OriginalMediaManifest
+    return
+  }
+
+  $null = Get-FtpListing -Path $OriginalMediaDir
+
+  if (-not [string]::IsNullOrWhiteSpace($RollbackArchive)) {
+    if ($RollbackArchive -match "[/\\]") {
+      throw "RollbackArchive must be one archive folder name, such as 20260525-140000."
+    }
+    $sourceArchive = Join-RemotePath -Base $archiveRoot -Child $RollbackArchive
+    $sourceItems = Get-FtpListing -Path $sourceArchive
+    if (-not $sourceItems) {
+      throw "Rollback archive '$sourceArchive' is empty or unavailable."
+    }
+    $safetyArchive = Join-RemotePath -Base $archiveRoot -Child "before-rollback-$timestamp"
+    Write-Host "Archiving current live files to $safetyArchive before rollback."
+    Move-LiveItemsToArchive -ArchiveDir $safetyArchive
+    foreach ($item in $sourceItems) {
+      Move-RemoteItem -SourcePath (Join-RemotePath -Base $sourceArchive -Child $item.Name) -DestinationPath (Join-RemotePath -Base $RemoteDir -Child $item.Name)
+    }
+    Write-Host "Rollback completed from $sourceArchive. Pre-rollback live files are in $safetyArchive."
+    return
+  }
+
+  $resolvedBuildDir = Join-Path $projectRoot $BuildDir
+  if (-not $SkipBuild) {
+    Write-Host "Building project..."
+    Push-Location $projectRoot
+    try {
+      npm run build
+      if ($LASTEXITCODE -ne 0) {
+        throw "Build failed."
+      }
+    }
+    finally {
+      Pop-Location
+    }
+  }
+
+  if (-not (Test-Path -LiteralPath $resolvedBuildDir)) {
+    throw "Build directory '$resolvedBuildDir' does not exist after build."
+  }
+
+  $archiveDir = Join-RemotePath -Base $archiveRoot -Child $timestamp
+  if ($UploadOnly) {
+    Write-Warning "UploadOnly is enabled. Existing remote files will not be archived before upload."
+  }
+  else {
+    Write-Host "Preparing remote archive folder $archiveDir"
+    Move-LiveItemsToArchive -ArchiveDir $archiveDir
+  }
+
+  try {
+    Upload-BuildOutput -ResolvedBuildDir $resolvedBuildDir
+  }
+  catch {
+    if (-not $UploadOnly) {
+      Write-Error "Upload failed after archival began. Recovery archive: $archiveDir. Roll back with: npm run deploy:ftp:rollback -- -RollbackArchive $timestamp"
+    }
+    throw
   }
 
   if ($UploadOnly) {
@@ -436,6 +579,7 @@ try {
   }
 }
 finally {
+  $script:Password = $null
   if ($null -ne $script:PreviousCertificateValidationCallback) {
     [Net.ServicePointManager]::ServerCertificateValidationCallback = $script:PreviousCertificateValidationCallback
   }

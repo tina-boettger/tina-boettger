@@ -1,73 +1,112 @@
 # Tina Boettger Website
 
-Personal website for Tina Boettger with a routed Inner Compass subpage and agent-readable metadata assets.
+Personal website for Tina Boettger with routed Inner Compass and blog pages, agent-readable metadata assets, and a guarded FTP release workflow.
 
-## Local Development
+## First-Time Computer Setup
 
-1. Install dependencies:
-   `npm.cmd install`
+Required local tools:
 
-2. Start the development server:
-   `npm.cmd run dev`
+- Git for Windows with Git Credential Manager
+- Node.js 24 LTS and npm
+- Visual Studio Code if editing files manually
+- PowerShell modules `Microsoft.PowerShell.SecretManagement` and `Microsoft.PowerShell.SecretStore`
 
-3. Open:
-   `http://localhost:3000/`
+Install project dependencies and confirm the project builds:
 
-## Build For FTP Upload
+```powershell
+npm ci
+npm run lint
+npm run build
+```
 
-1. Build the static site:
-   `npm.cmd run build`
+Start the local site:
 
-2. Upload only the contents of the `dist` folder to the web root of the FTP server.
+```powershell
+npm run dev
+```
 
-Do not upload `src`, `node_modules`, old source folders, scan files, or the project root itself. The server only needs the built HTML, CSS, JavaScript, images, and public files inside `dist`.
+Open `http://localhost:3000/`.
 
-## Direct FTP Deploy From Codex
+This checkout currently lives in OneDrive. `node_modules` and `dist` are generated working folders and are excluded from Git. Do not keep original media archives or other permanent large files in this project folder.
 
-This repo now includes a local deployment script that can run from Codex on this machine and deploy straight to your FTP folder while archiving the current live files inside that same remote folder.
+## Normal Change Workflow
 
-1. Set these environment variables in PowerShell:
-   `$env:FTP_HOST = "frog.schelm-net.de"`
-   `$env:FTP_USERNAME = "..."`
-   `$env:FTP_PASSWORD = '...'`
-   `$env:FTP_REMOTE_DIR = "/"`
-   `$env:FTP_USE_SSL = "true"`
-   `$env:FTP_ACCEPT_INVALID_CERT = "false"`
+1. Create a branch for changes rather than editing directly on `main`.
+2. Edit and preview locally.
+3. Run `npm run lint` and `npm run build`.
+4. Push the branch and use GitHub checks before merging to `main`.
+5. Publish to FTP only after an explicit publish request.
 
-2. Run:
-   `npm run deploy:ftp`
+GitHub builds pull requests for verification. Pushes to `main` also produce a `site-dist.zip` workflow artifact; they do not deploy the live site automatically.
 
-The script will:
-- build the site
-- create a remote `_archives/<timestamp>/` folder
-- move everything in the current remote root except `_archives` into that archive folder
-- upload the fresh `dist` contents back into the live folder
-- upload `index.html` last to reduce half-deployed moments
+## Secure FTP Setup
 
-`FTP_USE_SSL` defaults to `true` because many hosts require explicit FTPS. The script still uses `ftp://` URLs; it enables TLS on the FTP control channel instead of switching to SFTP.
+FTP credentials must be stored in the password-protected PowerShell SecretStore vault. Do not use plaintext `.env`, `.env.deploy.ps1`, password text files, GitHub Actions secrets, or committed credentials for this deployment.
 
-If your host presents a certificate Windows cannot validate, first check whether the FTP host name should be changed to the certificate's real host name. If the host confirms this is expected, you can opt in with `$env:FTP_ACCEPT_INVALID_CERT = "true"`. This keeps FTPS encryption enabled but skips certificate trust and hostname validation for the deploy process.
+1. Confirm two FTP directories with the hosting setup:
 
-Use this dry-run command first if you want to verify the flow without making remote changes:
-`powershell -ExecutionPolicy Bypass -File .\scripts\deploy-ftp.ps1 -SkipBuild -WhatIf`
+   - `LiveDir`: the public website folder replaced during publication.
+   - `OriginalMediaDir`: a protected source-image folder that is retained across releases and is not publicly served where the host supports that.
 
-If a deploy was interrupted after archiving, use upload-only recovery to put the current `dist` files back into the live folder without archiving the partial state again:
-`powershell -ExecutionPolicy Bypass -File .\scripts\deploy-ftp.ps1 -UploadOnly`
+2. Copy `scripts/deploy-settings.example.psd1` to `scripts/deploy-settings.local.psd1` and fill in only non-secret settings. The local settings file is ignored by Git.
 
-## GitHub Build Artifact
+3. Store the FTP login in the local encrypted vault:
 
-The repo now includes a GitHub Actions workflow at [.github/workflows/build-release-package.yml](.github/workflows/build-release-package.yml).
+```powershell
+npm run ftp:setup-secret
+```
 
-On every push to `main`, GitHub will:
-- install dependencies
-- build the site
-- zip the contents of `dist`
-- upload `site-dist.zip` as a workflow artifact
+You will choose a SecretStore vault password and enter the FTP credentials. The vault is configured to request its password again for later publishing sessions.
 
-That gives you a clean packaged build in GitHub even if the live deploy still happens from Codex over FTP.
+Deleting an old plaintext credential file does not invalidate the password. Ask the hosting administrator to rotate the FTP password when possible.
 
-For the human-safe version of publishing, follow [RELEASE_CHECKLIST.md](RELEASE_CHECKLIST.md).
+## Permanent Original Media Storage
 
-## Route Support
+The project contains a one-time manifest at `scripts/original-media-manifest.txt` for source-quality images that should be preserved on FTP but not shipped with every site release.
 
-The build includes an Apache `.htaccess` file so direct links like `/inner-compass` can load the React app on standard Apache hosting. Keep `.htaccess` when uploading to FTP.
+Only after `OriginalMediaDir` has been confirmed as a suitable protected location, upload and verify those originals:
+
+```powershell
+npm run ftp:archive-originals
+```
+
+After successful verification, unused originals can be removed from `public`; routine site deployments will then contain only visitor-facing optimized assets. The deployment script protects `OriginalMediaDir` from release archival and replacement.
+
+## Publishing
+
+Build and perform a non-mutating FTP preflight first:
+
+```powershell
+npm run deploy:ftp:dry-run
+```
+
+Publish the current checked-out code:
+
+```powershell
+npm run deploy:ftp
+```
+
+The publish script:
+
+- unlocks and reads FTP credentials from SecretStore
+- verifies `LiveDir` and `OriginalMediaDir` are separate
+- builds the site before looking for `dist`
+- archives current live files in `LiveDir/_archives/<timestamp>/`
+- leaves the protected original-media directory untouched
+- uploads the new build and uploads `index.html` last
+
+If an upload fails after archival begins, the command reports the archive identifier needed for rollback.
+
+## Rollback
+
+Restore one live-site archive without changing the protected original-media directory:
+
+```powershell
+npm run deploy:ftp:rollback -- -RollbackArchive 20260525-140000
+```
+
+Rollback first creates a safety archive of the current live files, then moves the selected archive back into place.
+
+## Routes And Hosting
+
+The build creates static entry files for public routes and includes an Apache `.htaccess` fallback so direct links such as `/inner-compass` work on standard Apache FTP hosting. Keep `.htaccess` in deployed output.

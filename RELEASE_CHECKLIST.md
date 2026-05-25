@@ -1,44 +1,53 @@
 # Release Checklist
 
-Use this list each time you want to publish without surprises.
+Use this checklist whenever the live site is updated.
 
 ## Before Release
 
-1. Run `npm run build`
-2. Quickly open the local preview if you changed layout or content heavily
-3. Confirm the FTP target folder is the live folder you actually want to replace
-4. Keep your FTP client open in case you want to inspect `_archives` right after deploy
+1. Confirm the intended changes are committed or clearly identified on the current branch.
+2. Run `npm run lint` and `npm run build`.
+3. Preview changed routes locally, especially pages affected by content, links, downloads, or layout changes.
+4. Confirm the deployment targets the configured `LiveDir` and excludes `OriginalMediaDir`.
+5. Unlock SecretStore only for the publishing session.
 
-## Safe Test
+## Dry Run
 
-Run a dry run first whenever the FTP settings changed:
+Run this after credential, folder, or deployment-script changes and before the first live release from a new computer:
 
-`powershell -ExecutionPolicy Bypass -File .\scripts\deploy-ftp.ps1 -SkipBuild -WhatIf`
+```powershell
+npm run deploy:ftp:dry-run
+```
 
-That shows what would be moved and uploaded without touching the server.
+It builds and checks the FTP target while reporting planned moves/uploads without altering live files.
 
 ## Real Release
 
-1. Set the FTP environment variables
-2. Run `npm run deploy:ftp`
-3. Wait until the script says the deploy completed
-4. Open the live site and test the homepage and one or two important subpages
+A direct request to publish authorizes a live deployment after validation.
+
+```powershell
+npm run deploy:ftp
+```
+
+Record the reported `_archives/<timestamp>` backup folder, then verify:
+
+- `https://tina-boettger.com/`
+- `/inner-compass`, `/for-agents`, `/blog`, and the changed page routes
+- `/sitemap.xml` and `/robots.txt`
+- any changed images or public downloads
 
 ## Rollback
 
-If the release looks wrong:
+If live verification fails, restore the archive reported by the release:
 
-1. Connect with your FTP client
-2. Open the remote `_archives` folder
-3. Find the newest timestamped backup
-4. Move the broken live files out of the way
-5. Move the archived files back into the live folder
+```powershell
+npm run deploy:ftp:rollback -- -RollbackArchive <timestamp>
+```
 
-## GitHub Role
+The rollback preserves the permanent original-media folder and creates its own safety backup of the replaced live files.
 
-GitHub is the safe home for the code.
+## Credential Safety
 
-- Push code there first
-- Let GitHub build `site-dist.zip`
-- Use Codex to deploy the current code to FTP when you are ready
-
+- Credentials belong only in the local password-protected SecretStore vault.
+- Never paste FTP passwords into repository files, GitHub Actions, commit messages, or release logs.
+- Delete legacy plaintext credential files once the vault-backed deploy has been validated.
+- Request FTP password rotation from the hosting administrator when possible; deleting a saved password alone does not revoke access.
