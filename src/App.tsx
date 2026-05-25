@@ -112,20 +112,14 @@ const TRANSLATIONS: any = {
     resources: {
       tag: "Resources",
       headline: "Tools & Presentations.",
-      intro: "Explore my interactive tools and download presentations from my recent keynotes.",
+      intro: "Explore my interactive tools and request presentations from my recent keynotes.",
       compass_title: "Inner Compass",
       compass_desc: "Discover your AI leadership style and navigate the complexities of human-centered AI with my interactive questionnaire created on Lovable.",
       compass_cta: "Try out my Inner Compass",
       compass_url: "/inner-compass",
       presentations_title: "Presentations",
-      presentations_desc: "Download slides and materials from my masterclasses.",
-      presentations_cta: "View Resources",
-      password_placeholder: "Enter Password",
-      unlock: "Unlock",
-      incorrect_password: "Incorrect password. Please try again.",
-      unlocked_msg: "Resources unlocked! Your downloads are ready:",
-      download_link_1: "Slide Deck (PDF)",
-      download_link_2: "Worksheets (PDF)"
+      presentations_desc: "Request slides and materials from my masterclasses.",
+      presentations_cta: "Request Materials"
     },
     contact: {
       tag: "Inquiries",
@@ -228,12 +222,8 @@ const TRANSLATIONS: any = {
       compass_cta: "Finde deinen inneren Kompass",
       compass_url: "/inner-compass",
       presentations_title: "Präsentationen",
-      presentations_desc: "Lade Folien und Materialien meiner Masterclasses herunter.",
-      presentations_cta: "Ressourcen ansehen",
-      password_placeholder: "Passwort eingeben",
-      unlock: "Entsperren",
-      incorrect_password: "Falsches Passwort. Bitte noch einmal versuchen.",
-      unlocked_msg: "Ressourcen entsperrt! Deine Downloads sind bereit:",
+      presentations_desc: "Frage Folien und Materialien meiner Masterclasses an.",
+      presentations_cta: "Materialien anfragen",
       download_link_1: "Präsentation (PDF)",
       download_link_2: "Arbeitsblätter (PDF)"
     },
@@ -272,11 +262,6 @@ function HomePage() {
     const parsed = saved ? Number(saved) : 1;
     return Number.isFinite(parsed) ? parsed : 1;
   });
-  
-  const [showPasswordInput, setShowPasswordInput] = useState(false);
-  const [resourcePassword, setResourcePassword] = useState("");
-  const [isResourceUnlocked, setIsResourceUnlocked] = useState(false);
-  const [passwordError, setPasswordError] = useState(false);
   
   const t = TRANSLATIONS[lang];
   usePageSeo({
@@ -891,53 +876,13 @@ function HomePage() {
                 {t.resources.presentations_desc}
               </p>
               
-              {isResourceUnlocked ? (
-                <div className="space-y-4">
-                  <p className="text-brand-green font-semibold">{t.resources.unlocked_msg}</p>
-                  <ul className="list-disc list-inside text-brand-muted text-sm space-y-2">
-                    <li><a href="#" className="underline hover:text-brand-green">{t.resources.download_link_1}</a></li>
-                    <li><a href="#" className="underline hover:text-brand-green">{t.resources.download_link_2}</a></li>
-                  </ul>
-                </div>
-              ) : showPasswordInput ? (
-                <div className="flex flex-col gap-3">
-                  <div className="flex gap-2">
-                    <input 
-                      type="password"
-                      value={resourcePassword}
-                      onChange={(e) => {
-                        setResourcePassword(e.target.value);
-                        setPasswordError(false);
-                      }}
-                      placeholder={t.resources.password_placeholder}
-                      className="border border-brand-line px-4 py-2 bg-white text-sm w-full outline-none focus:border-brand-green"
-                    />
-                    <button 
-                      onClick={() => {
-                        if (resourcePassword === "tina2026") {
-                          setIsResourceUnlocked(true);
-                          setPasswordError(false);
-                        } else {
-                          setPasswordError(true);
-                        }
-                      }}
-                      className="bg-brand-charcoal text-white px-4 py-2 font-bold uppercase tracking-widest text-xs hover:bg-brand-green transition-all whitespace-nowrap"
-                    >
-                      {t.resources.unlock}
-                    </button>
-                  </div>
-                  {passwordError && (
-                    <p className="text-red-500 text-xs font-semibold">{t.resources.incorrect_password}</p>
-                  )}
-                </div>
-              ) : (
-                <button 
-                  onClick={() => setShowPasswordInput(true)}
-                  className="inline-flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-brand-charcoal border border-brand-line hover:border-brand-green hover:text-brand-green px-6 py-4 transition-all whitespace-nowrap"
-                >
-                  {t.resources.presentations_cta} <ArrowRight className="w-4 h-4" />
-                </button>
-              )}
+              <a
+                href="#contact"
+                onClick={(event) => scrollToSection(event, "#contact")}
+                className="inline-flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-brand-charcoal border border-brand-line hover:border-brand-green hover:text-brand-green px-6 py-4 transition-all whitespace-nowrap"
+              >
+                {t.resources.presentations_cta} <ArrowRight className="w-4 h-4" />
+              </a>
             </div>
           </div>
         </div>
@@ -976,6 +921,9 @@ function HomePage() {
             >
               <input 
                 type="text" 
+                name="name"
+                autoComplete="name"
+                maxLength={120}
                 required
                 className="w-full bg-white border border-brand-line rounded-[4px] px-4 py-4 focus:outline-none focus:border-brand-green transition-colors text-sm" 
                 placeholder={t.contact.placeholders.name} 
@@ -984,6 +932,9 @@ function HomePage() {
               />
               <input 
                 type="email" 
+                name="email"
+                autoComplete="email"
+                maxLength={254}
                 required
                 className="w-full bg-white border border-brand-line rounded-[4px] px-4 py-4 focus:outline-none focus:border-brand-green transition-colors text-sm" 
                 placeholder={t.contact.placeholders.email} 
@@ -991,6 +942,8 @@ function HomePage() {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
               <textarea 
+                name="message"
+                maxLength={4000}
                 required
                 className="w-full bg-white border border-brand-line rounded-[4px] px-4 py-4 focus:outline-none focus:border-brand-green transition-colors h-32 resize-none text-sm" 
                 placeholder={t.contact.placeholders.message}
@@ -1256,6 +1209,12 @@ function PrivacyContent() {
         </p>
       </LegalSection>
 
+      <LegalSection title="Inner Compass und lokale Speicherung">
+        <p>
+          Eingaben im Inner Compass, einschliesslich Freitext, werden ausschliesslich lokal im Browser deines Geraets gespeichert, damit du eine Reflexion fortsetzen oder drucken kannst. Sie werden nicht an diese Website gesendet. Du kannst die gespeicherten Eingaben in der Anwendung jederzeit loeschen.
+        </p>
+      </LegalSection>
+
       <LegalSection title="Schriftarten">
         <p>
           Diese Website lädt Google Fonts über eine externe CSS-Einbindung. Dabei kann deine IP-Adresse an Google übermittelt werden. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; das berechtigte Interesse liegt in einer einheitlichen und ansprechenden Darstellung der Website.
@@ -1319,6 +1278,12 @@ function PrivacyContentEn() {
       <LegalSection title="External Links and LinkedIn">
         <p>
           This website contains links to external services, especially LinkedIn. When you click an external link, you leave this website. The respective provider is responsible for data processing on the linked pages.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="Inner Compass and Local Storage">
+        <p>
+          Inner Compass responses, including free text, are stored only in your device&apos;s browser so that you can resume or print a reflection. They are not transmitted to this website. You can erase stored responses from within the tool at any time.
         </p>
       </LegalSection>
 
