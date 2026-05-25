@@ -1,0 +1,22 @@
+# Source-quality files to preserve once in the protected FTP originals folder.
+# Do not remove these from public/ until `npm run ftp:archive-originals` succeeds.
+AI BarCamp 2025-03-12 13.26.46- S7306664.jpg
+Ai barcamp.png
+BP Summit.png
+ChatGPT Image 22. Apr. 2026, 21_39_33.png
+ChatGPT Image 22. Apr. 2026, 21_49_17.png
+Deutsche Telekom-n.png
+Di4.jpg
+Digital Gipfel-1.jpg
+digital x.jpg
+erasure-machine-ai-inherits.png
+ExplorAItion Day.png
+Femworx-1.png
+Fraunhofer-1.png
+GAPS-1.png
+Hackathon.png
+Horizontal picture.jpg
+New Picture.jpg
+New Picture.png
+Workshops.jpg
+curia.jpeg
