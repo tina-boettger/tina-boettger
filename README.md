@@ -9,7 +9,6 @@ Required local tools:
 - Git for Windows with Git Credential Manager
 - Node.js 24 LTS and npm
 - Visual Studio Code if editing files manually
-- PowerShell modules `Microsoft.PowerShell.SecretManagement` and `Microsoft.PowerShell.SecretStore`
 
 Install project dependencies and confirm the project builds:
 
@@ -41,7 +40,7 @@ GitHub builds pull requests for verification. Pushes to `main` also produce a `s
 
 ## Secure FTP Setup
 
-FTP credentials must be stored in the password-protected PowerShell SecretStore vault. Do not use plaintext `.env`, `.env.deploy.ps1`, password text files, GitHub Actions secrets, or committed credentials for this deployment.
+FTP credentials must be stored in Windows Credential Manager, encrypted for the signed-in Windows user account. Do not use plaintext `.env`, `.env.deploy.ps1`, password text files, GitHub Actions secrets, or committed credentials for this deployment.
 
 1. Confirm two FTP directories with the hosting setup:
 
@@ -50,13 +49,13 @@ FTP credentials must be stored in the password-protected PowerShell SecretStore 
 
 2. Copy `scripts/deploy-settings.example.psd1` to `scripts/deploy-settings.local.psd1` and fill in only non-secret settings. The local settings file is ignored by Git.
 
-3. Store the FTP login in the local encrypted vault:
+3. Store the FTP login in Windows Credential Manager:
 
 ```powershell
-npm run ftp:setup-secret
+npm run ftp:setup-credential
 ```
 
-You will choose a SecretStore vault password and enter the FTP credentials. The vault is configured to request its password again for later publishing sessions.
+Enter the FTP credentials once in the secure Windows prompt. Subsequent publishing retrieves them through your Windows login and does not require a separate website-vault password. Anyone able to sign in as your Windows user can use this publishing credential.
 
 4. Inspect the FTP live-folder layout without changing remote files:
 
@@ -82,7 +81,7 @@ After successful verification, unused originals can be removed from `public`; ro
 
 ## Publishing
 
-For a release, open one PowerShell window and leave it open through preflight, publish, and any immediate verification. SecretStore remains unlocked in that PowerShell session for its configured timeout, so you should normally enter the vault password once per release session rather than once per command.
+For a release, run preflight and publish from the intended `main` checkout. Windows Credential Manager retrieves the FTP login automatically for your signed-in Windows account.
 
 Build and perform a non-mutating FTP preflight first in that same window:
 
@@ -98,7 +97,7 @@ Publish the current checked-out code:
 
 The publish script:
 
-- unlocks and reads FTP credentials from SecretStore
+- reads FTP credentials from Windows Credential Manager for the signed-in Windows account
 - verifies `LiveDir` and `OriginalMediaDir` are separate
 - builds the site before looking for `dist`
 - archives current live files in `LiveDir/_archives/<timestamp>/`

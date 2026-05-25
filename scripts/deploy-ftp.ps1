@@ -482,25 +482,20 @@ $RemoteDirValue = [string]$settings.LiveDir
 $OriginalMediaDirValue = [string]$settings.OriginalMediaDir
 $UseSsl = [string]$settings.UseSsl
 $AcceptInvalidCert = [string]$settings.AcceptInvalidCertificate
-$vaultName = [string]$settings.VaultName
-$secretName = [string]$settings.SecretName
+$credentialTarget = [string]$settings.CredentialTarget
 
 Ensure-Value -Value $HostName -Name "HostName"
 Ensure-Value -Value $RemoteDirValue -Name "LiveDir"
 Ensure-Value -Value $OriginalMediaDirValue -Name "OriginalMediaDir"
-Ensure-Value -Value $vaultName -Name "VaultName"
-Ensure-Value -Value $secretName -Name "SecretName"
+Ensure-Value -Value $credentialTarget -Name "CredentialTarget"
 $RemoteDir = Normalize-RemoteDir $RemoteDirValue
 $OriginalMediaDir = Normalize-RemoteDir $OriginalMediaDirValue
 $UseSsl = ConvertTo-Bool -Value $UseSsl -Default $true -Name "UseSsl"
 $AcceptInvalidCert = ConvertTo-Bool -Value $AcceptInvalidCert -Default $false -Name "AcceptInvalidCertificate"
 $null = Get-ProtectedLiveNames
 
-Import-Module Microsoft.PowerShell.SecretManagement -ErrorAction Stop
-$ftpCredential = Get-Secret -Name $secretName -Vault $vaultName -ErrorAction Stop
-if ($ftpCredential -isnot [System.Management.Automation.PSCredential]) {
-  throw "Secret '$secretName' in vault '$vaultName' must be stored as a PSCredential."
-}
+. (Join-Path $PSScriptRoot "windows-credential.ps1")
+$ftpCredential = Get-WebsiteWindowsCredential -Target $credentialTarget
 $script:Username = $ftpCredential.UserName
 $script:Password = $ftpCredential.GetNetworkCredential().Password
 

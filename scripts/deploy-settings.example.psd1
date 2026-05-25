@@ -5,6 +5,5 @@
   OriginalMediaDir         = "" # Must be a protected folder that routine releases never replace.
   UseSsl                   = $true
   AcceptInvalidCertificate = $false
-  VaultName                = "WebsitePublishing"
-  SecretName               = "tina-boettger.com/ftp"
+  CredentialTarget         = "tina-boettger.com/ftp"
 }

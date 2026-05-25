@@ -8,7 +8,7 @@ Use this checklist whenever the live site is updated.
 2. Run `npm run lint` and `npm run build`.
 3. Preview changed routes locally, especially pages affected by content, links, downloads, or layout changes.
 4. Confirm the deployment targets the configured `LiveDir` and excludes `OriginalMediaDir`.
-5. Open one PowerShell window for the entire release session. The vault password should be required once in that session, not once for every release command.
+5. Confirm you are signed in to your Windows account; FTP credentials are retrieved through Windows Credential Manager without a separate publishing password.
 
 ## Dry Run
 
@@ -49,7 +49,7 @@ The permanent original-media folder is protected from ordinary HTTP access using
 
 ## Credential Safety
 
-- Credentials belong only in the local password-protected SecretStore vault.
+- Credentials belong only in Windows Credential Manager for the signed-in Windows account.
 - Never paste FTP passwords into repository files, GitHub Actions, commit messages, or release logs.
-- Delete legacy plaintext credential files once the vault-backed deploy has been validated.
+- Delete legacy plaintext credential files and remove the obsolete SecretStore credential after Windows Credential Manager deployment has been validated.
 - Request FTP password rotation from the hosting administrator when possible; deleting a saved password alone does not revoke access.
