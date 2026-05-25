@@ -13,6 +13,7 @@ id_rsa
 id_rsa.pub
 secrets.json
 ftp-password.txt
+.ftp-layout-check.log
 
 .DS_Store
 Thumbs.db

@@ -46,7 +46,7 @@ FTP credentials must be stored in the password-protected PowerShell SecretStore 
 1. Confirm two FTP directories with the hosting setup:
 
    - `LiveDir`: the public website folder replaced during publication.
-   - `OriginalMediaDir`: a protected source-image folder that is retained across releases and is not publicly served where the host supports that.
+   - `OriginalMediaDir`: the retained source-image folder excluded from routine releases. On this hosting account it is `/_protected-originals/`, protected from browser access by its own `.htaccess`.
 
 2. Copy `scripts/deploy-settings.example.psd1` to `scripts/deploy-settings.local.psd1` and fill in only non-secret settings. The local settings file is ignored by Git.
 
@@ -58,13 +58,21 @@ npm run ftp:setup-secret
 
 You will choose a SecretStore vault password and enter the FTP credentials. The vault is configured to request its password again for later publishing sessions.
 
+4. Inspect the FTP live-folder layout without changing remote files:
+
+```powershell
+npm run ftp:inspect-layout
+```
+
+Use this read-only check to confirm a protected `OriginalMediaDir` before archiving source photos.
+
 Deleting an old plaintext credential file does not invalidate the password. Ask the hosting administrator to rotate the FTP password when possible.
 
 ## Permanent Original Media Storage
 
 The project contains a one-time manifest at `scripts/original-media-manifest.txt` for source-quality images that should be preserved on FTP but not shipped with every site release.
 
-Only after `OriginalMediaDir` has been confirmed as a suitable protected location, upload and verify those originals:
+Only after `OriginalMediaDir` has been confirmed, upload and verify those originals. This upload creates the remote access-denial `.htaccess` before transferring source images:
 
 ```powershell
 npm run ftp:archive-originals
@@ -74,16 +82,18 @@ After successful verification, unused originals can be removed from `public`; ro
 
 ## Publishing
 
-Build and perform a non-mutating FTP preflight first:
+For a release, open one PowerShell window and leave it open through preflight, publish, and any immediate verification. SecretStore remains unlocked in that PowerShell session for its configured timeout, so you should normally enter the vault password once per release session rather than once per command.
+
+Build and perform a non-mutating FTP preflight first in that same window:
 
 ```powershell
-npm run deploy:ftp:dry-run
+.\scripts\deploy-ftp.ps1 -WhatIf
 ```
 
 Publish the current checked-out code:
 
 ```powershell
-npm run deploy:ftp
+.\scripts\deploy-ftp.ps1
 ```
 
 The publish script:

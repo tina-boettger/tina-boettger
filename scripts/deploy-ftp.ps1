@@ -429,6 +429,12 @@ function Upload-OriginalMediaFiles {
     Ensure-RemoteDirectory -Path $OriginalMediaDir
   }
 
+  $protectionFile = Join-Path $projectRoot "scripts\protected-originals.htaccess"
+  if (-not (Test-Path -LiteralPath $protectionFile)) {
+    throw "Missing protected-originals access control file '$protectionFile'."
+  }
+  Upload-File -LocalPath $protectionFile -RemotePath (Join-RemotePath -Base $OriginalMediaDir -Child ".htaccess")
+
   foreach ($fileName in $files) {
     $localPath = Join-Path (Join-Path $projectRoot "public") $fileName
     if (-not (Test-Path -LiteralPath $localPath)) {
@@ -451,7 +457,8 @@ function Upload-OriginalMediaFiles {
     }
   }
 
-  Write-Host "Original media upload verified for $($files.Count) files in $OriginalMediaDir."
+  Write-Host "Protected original media upload verified for $($files.Count) files in $OriginalMediaDir."
+  Write-Host "FTP listings may hide .htaccess files; verify browser access to an archived image is denied before removing public originals."
 }
 
 if ($UploadOriginalMedia -and -not [string]::IsNullOrWhiteSpace($RollbackArchive)) {

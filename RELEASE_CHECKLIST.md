@@ -8,14 +8,14 @@ Use this checklist whenever the live site is updated.
 2. Run `npm run lint` and `npm run build`.
 3. Preview changed routes locally, especially pages affected by content, links, downloads, or layout changes.
 4. Confirm the deployment targets the configured `LiveDir` and excludes `OriginalMediaDir`.
-5. Unlock SecretStore only for the publishing session.
+5. Open one PowerShell window for the entire release session. The vault password should be required once in that session, not once for every release command.
 
 ## Dry Run
 
 Run this after credential, folder, or deployment-script changes and before the first live release from a new computer:
 
 ```powershell
-npm run deploy:ftp:dry-run
+.\scripts\deploy-ftp.ps1 -WhatIf
 ```
 
 It builds and checks the FTP target while reporting planned moves/uploads without altering live files.
@@ -25,7 +25,7 @@ It builds and checks the FTP target while reporting planned moves/uploads withou
 A direct request to publish authorizes a live deployment after validation.
 
 ```powershell
-npm run deploy:ftp
+.\scripts\deploy-ftp.ps1
 ```
 
 Record the reported `_archives/<timestamp>` backup folder, then verify:
@@ -40,10 +40,12 @@ Record the reported `_archives/<timestamp>` backup folder, then verify:
 If live verification fails, restore the archive reported by the release:
 
 ```powershell
-npm run deploy:ftp:rollback -- -RollbackArchive <timestamp>
+.\scripts\deploy-ftp.ps1 -RollbackArchive <timestamp>
 ```
 
 The rollback preserves the permanent original-media folder and creates its own safety backup of the replaced live files.
+
+The permanent original-media folder is protected from ordinary HTTP access using its own `.htaccess`; verify access remains denied after any hosting configuration change.
 
 ## Credential Safety
 

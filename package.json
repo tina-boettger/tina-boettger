@@ -14,6 +14,7 @@
     "deploy:ftp:dry-run": "powershell -ExecutionPolicy Bypass -File ./scripts/deploy-ftp.ps1 -WhatIf",
     "deploy:ftp:rollback": "powershell -ExecutionPolicy Bypass -File ./scripts/deploy-ftp.ps1",
     "ftp:archive-originals": "powershell -ExecutionPolicy Bypass -File ./scripts/deploy-ftp.ps1 -UploadOriginalMedia",
+    "ftp:inspect-layout": "powershell -ExecutionPolicy Bypass -File ./scripts/inspect-ftp-layout.ps1",
     "ftp:setup-secret": "powershell -ExecutionPolicy Bypass -File ./scripts/setup-ftp-secret.ps1",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "lint": "tsc --noEmit"
