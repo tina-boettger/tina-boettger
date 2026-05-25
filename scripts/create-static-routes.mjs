@@ -42,6 +42,10 @@ function sha256CspToken(text) {
   return `'sha256-${digest}'`;
 }
 
+function languageForRoute(route) {
+  return route === "/impressum" || route === "/datenschutz" ? "de" : "en";
+}
+
 const cspTokens = new Set();
 
 await Promise.all(
@@ -52,7 +56,7 @@ await Promise.all(
     const html = htmlTemplate.replace(
       structuredDataScriptPattern,
       `<script type="application/ld+json" data-seo="route-structured-data">${scriptText}</script>`,
-    );
+    ).replace('<html lang="en">', `<html lang="${languageForRoute(route)}">`);
     const outputPath = route === "/" ? indexPath : path.join(distDir, route.slice(1), "index.html");
     await mkdir(path.dirname(outputPath), { recursive: true });
     // FTP hosting often has no SPA fallback, so each public route needs a real file.
@@ -92,6 +96,9 @@ for (const route of routes) {
 
   if (!scriptMatch || scriptMatch[1] !== expected || !scriptSrc.includes(sha256CspToken(scriptMatch[1]))) {
     throw new Error(`Structured-data CSP validation failed for static route '${route}'.`);
+  }
+  if (!html.includes(`<html lang="${languageForRoute(route)}">`)) {
+    throw new Error(`Static language validation failed for route '${route}'.`);
   }
 }
 

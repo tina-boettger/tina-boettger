@@ -274,6 +274,7 @@ function HomePage() {
         ? "Tina Boettger ist Human-Centered AI Leaderin, Informatikerin und Speakerin mit Hintergrund bei Deutsche Telekom und Fraunhofer in trustworthy AI, KI-Führung und KI im öffentlichen Sektor."
         : "Tina Boettger is a human-centered AI leader, computer scientist, and speaker with Deutsche Telekom and Fraunhofer experience across trustworthy AI, AI leadership, and public-sector AI.",
     path: "/",
+    language: lang,
     jsonLd: getStructuredData("/"),
   });
   const navLinks = NAV_LINKS(t);
@@ -1014,6 +1015,7 @@ function LegalPage({ type, language }: { type: "impressum" | "privacy"; language
         ? "Legal notice for the website tina-boettger.com."
         : "Impressum und Anbieterkennzeichnung für die Website tina-boettger.com.",
     path: legalPath,
+    language: isEnglish ? "en" : "de",
     jsonLd: getStructuredData(legalPath),
   });
 

@@ -160,6 +160,7 @@ export default function PrintSummaryPage() {
     title: `${c.title} Printable Summary | Tina Boettger`,
     description: "Printable Inner Compass reflection summary generated locally in the browser.",
     path: "/print-summary",
+    language: summary.language,
     jsonLd: getStructuredData("/print-summary"),
   });
 
