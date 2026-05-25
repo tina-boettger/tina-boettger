@@ -2,7 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import LegalLinks from "./LegalLinks";
 import PhotoCredits from "./PhotoCredits";
 import { navigateToAppPath } from "./lib/routing";
-import { buildPersonSchema, buildWebsiteSchema, SITE_URL, usePageSeo } from "./lib/seo";
+import { getStructuredData, usePageSeo } from "./lib/seo";
 
 function navigateHome() {
   navigateToAppPath("/");
@@ -14,19 +14,7 @@ export default function ForAgentsPage() {
     description:
       "Agent-readable profile of Tina Boettger: human-centered AI leader, computer scientist, Deutsche Telekom AI community co-founder, Fraunhofer research background, speaker and advisor on trustworthy AI.",
     path: "/for-agents",
-    jsonLd: [
-      buildWebsiteSchema(),
-      buildPersonSchema(),
-      {
-        "@context": "https://schema.org",
-        "@type": "ProfilePage",
-        url: `${SITE_URL}/for-agents`,
-        name: "Agent-readable professional summary for Tina Boettger",
-        about: {
-          "@id": `${SITE_URL}#person`,
-        },
-      },
-    ],
+    jsonLd: getStructuredData("/for-agents"),
   });
 
   return (

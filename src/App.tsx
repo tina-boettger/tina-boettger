@@ -31,7 +31,7 @@ import PrintSummaryPage from "./inner-compass/pages/PrintSummaryPage";
 import LegalLinks from "./LegalLinks";
 import PhotoCredits from "./PhotoCredits";
 import { appAssetUrl, appHref, navigateToAppPath, normalizeRoutePath } from "./lib/routing";
-import { buildPersonSchema, buildWebsiteSchema, SITE_URL, usePageSeo } from "./lib/seo";
+import { getStructuredData, usePageSeo } from "./lib/seo";
 
 const NAV_LINKS = (t: any) => [
   { name: t.nav.references, href: "#references" },
@@ -274,19 +274,7 @@ function HomePage() {
         ? "Tina Boettger ist Human-Centered AI Leaderin, Informatikerin und Speakerin mit Hintergrund bei Deutsche Telekom und Fraunhofer in trustworthy AI, KI-Führung und KI im öffentlichen Sektor."
         : "Tina Boettger is a human-centered AI leader, computer scientist, and speaker with Deutsche Telekom and Fraunhofer experience across trustworthy AI, AI leadership, and public-sector AI.",
     path: "/",
-    jsonLd: [
-      buildWebsiteSchema(),
-      buildPersonSchema(),
-      {
-        "@context": "https://schema.org",
-        "@type": "AboutPage",
-        url: SITE_URL,
-        name: "Tina Boettger professional website",
-        about: {
-          "@id": `${SITE_URL}#person`,
-        },
-      },
-    ],
+    jsonLd: getStructuredData("/"),
   });
   const navLinks = NAV_LINKS(t);
   const MOMENTS = t.moments;
@@ -1014,6 +1002,8 @@ function LegalPage({ type, language }: { type: "impressum" | "privacy"; language
       ? "Legal Notice"
       : "Impressum";
 
+  const legalPath = isPrivacy ? (isEnglish ? "/privacy" : "/datenschutz") : isEnglish ? "/legal-notice" : "/impressum";
+
   usePageSeo({
     title: `${legalTitle} | Tina Boettger`,
     description: isPrivacy
@@ -1023,8 +1013,8 @@ function LegalPage({ type, language }: { type: "impressum" | "privacy"; language
       : isEnglish
         ? "Legal notice for the website tina-boettger.com."
         : "Impressum und Anbieterkennzeichnung für die Website tina-boettger.com.",
-    path: isPrivacy ? (isEnglish ? "/privacy" : "/datenschutz") : isEnglish ? "/legal-notice" : "/impressum",
-    jsonLd: [buildWebsiteSchema(), buildPersonSchema()],
+    path: legalPath,
+    jsonLd: getStructuredData(legalPath),
   });
 
   const goHome = (e: React.MouseEvent<HTMLAnchorElement>) => {

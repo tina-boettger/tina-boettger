@@ -3,35 +3,16 @@ import type { MouseEvent, ReactNode } from "react";
 import LegalLinks from "./LegalLinks";
 import PhotoCredits from "./PhotoCredits";
 import { appAssetUrl, appHref, navigateToAppPath } from "./lib/routing";
-import { buildPersonSchema, buildWebsiteSchema, SITE_URL, usePageSeo } from "./lib/seo";
+import { getStructuredData, SITE_URL, usePageSeo } from "./lib/seo";
+import {
+  BLOG_ARTICLE,
+  BLOG_ARTICLES,
+  BLOG_ARTICLE_PATH,
+  ERASURE_ARTICLE,
+  ERASURE_ARTICLE_PATH,
+} from "./lib/structured-data";
 
-export const BLOG_ARTICLE_PATH = "/blog/human-first-ai-machine-consciousness";
-export const ERASURE_ARTICLE_PATH = "/blog/the-erasure-machine-ai-inherits";
-
-export const BLOG_ARTICLE = {
-  title: "Human-First AI and the Question of Machine Consciousness",
-  subtitle: "Science, ethics, power, and the politics of seeming alive.",
-  date: "May 14, 2026",
-  isoDate: "2026-05-14",
-  image: "/ai-consciousness-essay-visual.webp",
-  excerpt:
-    "A human-first look at AI consciousness: why today's systems should not be treated as conscious, why future uncertainty still matters, and how governance can protect people without collapsing into AI personhood.",
-  path: BLOG_ARTICLE_PATH,
-};
-
-export const ERASURE_ARTICLE = {
-  title: "The Erasure Machine: How the Web Forgets, and What AI Inherits",
-  subtitle:
-    "What gets lost before training begins, and how AI systems inherit the web's structured silences.",
-  date: "May 15, 2026",
-  isoDate: "2026-05-15",
-  image: "/erasure-machine-ai-inherits.webp",
-  excerpt:
-    "A human-centered AI essay on the web's architecture of forgetting, System Zero, and why AI inherits not only what humanity wrote, but what our platforms allowed to remain visible.",
-  path: ERASURE_ARTICLE_PATH,
-};
-
-export const BLOG_ARTICLES = [BLOG_ARTICLE, ERASURE_ARTICLE];
+export { BLOG_ARTICLE, BLOG_ARTICLES, BLOG_ARTICLE_PATH, ERASURE_ARTICLE, ERASURE_ARTICLE_PATH };
 
 const sources = [
   { id: "1", label: "Butlin et al., Consciousness in Artificial Intelligence: Insights from the Science of Consciousness", url: "https://arxiv.org/abs/2308.08708" },
@@ -176,7 +157,7 @@ export function BlogIndexPage() {
     title: "Blog | Tina Boettger",
     description: "Writing and insights from Tina Boettger on human-first AI, responsible technology, power, ethics, and AI leadership.",
     path: "/blog",
-    jsonLd: [buildWebsiteSchema(), buildPersonSchema()],
+    jsonLd: getStructuredData("/blog"),
   });
 
   return (
@@ -267,30 +248,13 @@ function DomainTable({ rows }: { rows: Array<[string, string, string]> }) {
 }
 
 export function BlogArticlePage() {
-  const articleUrl = `${SITE_URL}${BLOG_ARTICLE.path}`;
-
   usePageSeo({
     title: `${BLOG_ARTICLE.title} | Tina Boettger`,
     description: BLOG_ARTICLE.excerpt,
     path: BLOG_ARTICLE.path,
     type: "article",
     image: `${SITE_URL}${BLOG_ARTICLE.image}`,
-    jsonLd: [
-      buildWebsiteSchema(),
-      buildPersonSchema(),
-      {
-        "@context": "https://schema.org",
-        "@type": "BlogPosting",
-        headline: BLOG_ARTICLE.title,
-        description: BLOG_ARTICLE.excerpt,
-        datePublished: BLOG_ARTICLE.isoDate,
-        dateModified: BLOG_ARTICLE.isoDate,
-        image: `${SITE_URL}${BLOG_ARTICLE.image}`,
-        url: articleUrl,
-        author: { "@id": `${SITE_URL}#person` },
-        publisher: { "@id": `${SITE_URL}#person` },
-      },
-    ],
+    jsonLd: getStructuredData(BLOG_ARTICLE.path),
   });
 
   return (
@@ -523,30 +487,13 @@ export function BlogArticlePage() {
 }
 
 export function ErasureArticlePage() {
-  const articleUrl = `${SITE_URL}${ERASURE_ARTICLE.path}`;
-
   usePageSeo({
     title: `${ERASURE_ARTICLE.title} | Tina Boettger`,
     description: ERASURE_ARTICLE.excerpt,
     path: ERASURE_ARTICLE.path,
     type: "article",
     image: `${SITE_URL}${ERASURE_ARTICLE.image}`,
-    jsonLd: [
-      buildWebsiteSchema(),
-      buildPersonSchema(),
-      {
-        "@context": "https://schema.org",
-        "@type": "BlogPosting",
-        headline: ERASURE_ARTICLE.title,
-        description: ERASURE_ARTICLE.excerpt,
-        datePublished: ERASURE_ARTICLE.isoDate,
-        dateModified: ERASURE_ARTICLE.isoDate,
-        image: `${SITE_URL}${ERASURE_ARTICLE.image}`,
-        url: articleUrl,
-        author: { "@id": `${SITE_URL}#person` },
-        publisher: { "@id": `${SITE_URL}#person` },
-      },
-    ],
+    jsonLd: getStructuredData(ERASURE_ARTICLE.path),
   });
 
   return (

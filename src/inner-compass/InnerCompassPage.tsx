@@ -7,7 +7,7 @@ import PhotoCredits from "../PhotoCredits";
 import Toaster from "./components/Toaster";
 import ReflectionFlow from "./pages/ReflectionFlow";
 import { navigateToAppPath } from "../lib/routing";
-import { SITE_URL, buildPersonSchema, buildWebsiteSchema, usePageSeo } from "../lib/seo";
+import { getStructuredData, usePageSeo } from "../lib/seo";
 
 function navigateHome() {
   navigateToAppPath("/");
@@ -45,22 +45,7 @@ export default function InnerCompassPage() {
     description:
       "Inner Compass is Tina Boettger's interactive reflection tool for exploring AI leadership style, work patterns, energy, strengths, and environment fit.",
     path: "/inner-compass",
-    jsonLd: [
-      buildWebsiteSchema(),
-      buildPersonSchema(),
-      {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        name: "Inner Compass",
-        url: `${SITE_URL}/inner-compass`,
-        description:
-          "Interactive reflection tool by Tina Boettger for exploring AI leadership style, work patterns, and environment fit.",
-        applicationCategory: "BusinessApplication",
-        creator: {
-          "@id": `${SITE_URL}#person`,
-        },
-      },
-    ],
+    jsonLd: getStructuredData("/inner-compass"),
   });
 
   return (

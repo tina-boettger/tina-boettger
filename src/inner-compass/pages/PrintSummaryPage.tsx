@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { generateInsight } from "../lib/insightEngine";
 import { getWords, loadPrintableSummary, PRINT_CATEGORIES, type PrintCategory, type PrintSummaryState } from "../lib/printSummary";
 import { translations } from "../lib/translations";
-import { SITE_URL, buildPersonSchema, buildWebsiteSchema, usePageSeo } from "../../lib/seo";
+import { getStructuredData, usePageSeo } from "../../lib/seo";
 
 const CATEGORY_COLORS: Record<PrintCategory, string> = {
   energy: "#2d6a3f",
@@ -160,17 +160,7 @@ export default function PrintSummaryPage() {
     title: `${c.title} Printable Summary | Tina Boettger`,
     description: "Printable Inner Compass reflection summary generated locally in the browser.",
     path: "/print-summary",
-    jsonLd: [
-      buildWebsiteSchema(),
-      buildPersonSchema(),
-      {
-        "@context": "https://schema.org",
-        "@type": "CreativeWork",
-        name: "Inner Compass Printable Summary",
-        url: `${SITE_URL}/print-summary`,
-        creator: { "@id": `${SITE_URL}#person` },
-      },
-    ],
+    jsonLd: getStructuredData("/print-summary"),
   });
 
   useEffect(() => {

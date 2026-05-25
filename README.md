@@ -120,3 +120,4 @@ Rollback first creates a safety archive of the current live files, then moves th
 ## Routes And Hosting
 
 The build creates static entry files for public routes and includes an Apache `.htaccess` fallback so direct links such as `/inner-compass` work on standard Apache FTP hosting. Keep `.htaccess` in deployed output.
+It also generates a strict Content Security Policy allow-list for the site's route-specific JSON-LD metadata; do not publish `public/.htaccess` without running the production build.
