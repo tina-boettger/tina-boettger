@@ -17,6 +17,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     localStorage.setItem("inner-compass-language", language);
+    document.documentElement.lang = language;
   }, [language]);
 
   return (

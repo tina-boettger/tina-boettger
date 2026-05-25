@@ -10,6 +10,7 @@ export interface PageSeoConfig {
   title: string;
   description: string;
   path: string;
+  language?: "en" | "de";
   type?: string;
   image?: string;
   jsonLd?: JsonLd;
@@ -62,12 +63,14 @@ export function applyPageSeo({
   title,
   description,
   path,
+  language = "en",
   type = "website",
   image = DEFAULT_OG_IMAGE,
   jsonLd,
 }: PageSeoConfig) {
   const canonical = `${SITE_URL}${path}`;
 
+  document.documentElement.lang = language;
   document.title = title;
   upsertMeta('meta[name="description"]', { name: "description", content: description });
   upsertMeta('meta[property="og:title"]', { property: "og:title", content: title });
