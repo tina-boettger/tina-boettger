@@ -16,12 +16,11 @@ $settings = Import-PowerShellDataFile -LiteralPath $SettingsPath
 $hostName = [string]$settings.HostName
 $liveDir = [string]$settings.LiveDir
 $originalMediaDir = [string]$settings.OriginalMediaDir
-$vaultName = [string]$settings.VaultName
-$secretName = [string]$settings.SecretName
+$credentialTarget = [string]$settings.CredentialTarget
 $useSsl = if ($null -eq $settings.UseSsl) { $true } else { [bool]$settings.UseSsl }
 $acceptInvalidCertificate = if ($null -eq $settings.AcceptInvalidCertificate) { $false } else { [bool]$settings.AcceptInvalidCertificate }
 
-foreach ($required in @("hostName", "liveDir", "vaultName", "secretName")) {
+foreach ($required in @("hostName", "liveDir", "credentialTarget")) {
   if ([string]::IsNullOrWhiteSpace((Get-Variable -Name $required -ValueOnly))) {
     throw "Deployment setting '$required' is required for FTP layout inspection."
   }
@@ -41,11 +40,8 @@ if (-not $liveDir.EndsWith("/")) {
   $liveDir = "$liveDir/"
 }
 
-Import-Module Microsoft.PowerShell.SecretManagement -ErrorAction Stop
-$credential = Get-Secret -Name $secretName -Vault $vaultName -ErrorAction Stop
-if ($credential -isnot [System.Management.Automation.PSCredential]) {
-  throw "Secret '$secretName' in vault '$vaultName' must be a PSCredential."
-}
+. (Join-Path $PSScriptRoot "windows-credential.ps1")
+$credential = Get-WebsiteWindowsCredential -Target $credentialTarget
 
 if ($useSsl -and $acceptInvalidCertificate) {
   $previousCertificateCallback = [Net.ServicePointManager]::ServerCertificateValidationCallback
